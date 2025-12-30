@@ -1,0 +1,456 @@
+/* --- TUS ESTILOS ORIGINALES (MANTENIDOS) --- */
+body {
+    display: flex;
+    justify-content: center;
+    background-color: #f5f5f5;
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.main-wrapper {
+    width: 90%;
+    max-width: 900px;
+    margin-top: 50px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #ff0000;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.titulo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.lista-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    table-layout: fixed;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.lista-table th,
+.lista-table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.lista-table th {
+    background: #f8f9fa;
+    padding: 0;
+}
+
+.lista-table th a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    width: 100%;
+    height: 100%;
+    transition: background 0.2s;
+}
+
+.lista-table th a:hover {
+    background: #f0f0f0;
+    color: #ee1515;
+}
+
+.sort-arrow {
+    margin-left: 8px;
+    font-size: 12px;
+    color: #ee1515;
+    display: inline-block;
+    width: 12px;
+}
+
+.id-col { width: 12%; text-align: center; color: #888; }
+.img-col { width: 15%; text-align: center; }
+.name-col { width: 38%; text-align: center; font-weight: bold; color: #2c3e50; }
+.type-col { width: 35%; text-align: center; color: #666; }
+td.type-col { font-style: italic; }
+
+.img-pokemon {
+    width: 50px;
+    height: 50px;
+}
+
+.filter-container {
+    position: relative;
+}
+
+.btn-filter-trigger {
+    background: #888;
+    color: white;
+    border: none;
+    padding: 10px 35px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.btn-filter-trigger:hover {
+    background: #666;
+}
+
+.filter-panel {
+    display: none;
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 240px;
+    background: #a0a0a0;
+    padding: 25px;
+    border-radius: 35px;
+    z-index: 1000;
+    box-shadow: 10px 10px 25px rgba(0,0,0,0.3);
+}
+
+.filter-field {
+    background: white;
+    margin-bottom: 18px;
+    padding: 12px;
+    border-radius: 18px;
+    text-align: center;
+}
+
+.filter-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+.filter-field input {
+    width: 90%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    outline: none;
+}
+
+.filter-field input:focus {
+    border-color: #ff0000;
+}
+
+.btn-apply {
+    width: 100%;
+    padding: 12px;
+    background: #ee1515;
+    color: white;
+    border: none;
+    border-radius: 18px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.btn-apply:active {
+    transform: scale(0.95);
+}
+
+.tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+    justify-content: center;
+}
+
+.tag {
+    background: #ff0000;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.tag span {
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 40px 0;
+}
+
+.btn-page {
+    padding: 10px 18px;
+    border: 1px solid #ddd;
+    background: white;
+    text-decoration: none;
+    border-radius: 8px;
+    color: #333;
+    transition: 0.2s;
+}
+
+.btn-page:hover {
+    background: #f0f0f0;
+}
+
+.btn-page.active {
+    background: #ff0000;
+    color: white;
+    border-color: #ff0000;
+    font-weight: bold;
+}
+
+/* --- ESTILOS DE DETALLE MANTENIDOS --- */
+.detail-number {
+    color: #aaa;
+    font-weight: normal;
+    margin-left: 10px;
+    font-size: 22px;
+}
+
+.detail-card-modern {
+    display: flex;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    gap: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    margin-bottom: 40px;
+}
+
+.image-container-inner {
+    background: #f9f9f9;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-container-inner img {
+    width: 100%;
+    max-width: 280px;
+    filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease;
+}
+
+.image-container-inner img:hover {
+    transform: scale(1.05);
+}
+
+.detail-data {
+    flex: 1;
+}
+
+.data-section {
+    margin-bottom: 25px;
+}
+
+.data-section h3 {
+    font-size: 14px;
+    color: #ee1515;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.info-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.info-item {
+    font-size: 16px;
+    color: #444;
+}
+
+.info-item strong {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+}
+
+/* --- ADICIONES PARA DETALLE COMPLETO --- */
+
+/* Caja de descripción dinámica */
+.description-box {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f1f2f6;
+    border-radius: 12px;
+    font-style: italic;
+    color: #555;
+    line-height: 1.5;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Contenedor de las 6 barras de estadísticas */
+.stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stat-label {
+    width: 80px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+}
+
+.stat-value {
+    width: 30px;
+    font-size: 13px;
+    text-align: right;
+    font-weight: bold;
+}
+
+/* Redefinición de barras para soportar múltiples colores */
+.bar-bg {
+    flex: 1;
+    height: 10px;
+    background: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.6s ease-in-out;
+}
+
+/* Colores específicos por estadística */
+.bar-fill.hp  { background: #FF0000; }
+.bar-fill.atk { background: #F08030; }
+.bar-fill.def { background: #F8D030; }
+.bar-fill.spa { background: #6890F0; }
+.bar-fill.spd { background: #78C850; }
+.bar-fill.spe { background: #F85888; }
+
+/* Evoluciones con flechas animadas */
+.evo-flex-modern {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.evo-box-modern {
+    text-align: center;
+    background: #fdfdfd;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.evo-box-modern:hover {
+    border-color: #ee1515;
+    transform: translateY(-3px);
+}
+
+.evo-box-modern.active {
+    background: #fff5f5;
+    border-color: #ee1515;
+    cursor: default;
+}
+
+.evo-box-modern img {
+    width: 60px;
+    height: 60px;
+}
+
+
+/* --- LINEA EVOLUTIVA --- */
+.evo-flex-modern {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.evo-box-modern {
+    text-align: center;
+    background: #fdfdfd;
+    padding: 10px;
+    border-radius: 15px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.evo-box-modern:hover {
+    border-color: #ee1515;
+    transform: translateY(-5px);
+}
+
+.evo-box-modern.active {
+    background: #fff5f5;
+    border-color: #ee1515;
+    cursor: default;
+}
+
+.evo-box-modern img {
+    width: 70px;
+    height: 70px;
+    display: block;
+    margin: 0 auto;
+}
+
+.evo-box-modern span {
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+    text-transform: capitalize;
+}
+
+.evo-arrow {
+    color: #ee1515;
+    font-size: 24px;
+    font-weight: bold;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: none !important;
+    transition: none !important;
+    flex-shrink: 0;
+    width: 30px;
+}

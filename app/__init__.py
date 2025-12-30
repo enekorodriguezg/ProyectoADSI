@@ -3,10 +3,9 @@ import sqlite3
 
 from flask import Flask
 
-from app.controller.ui.book_controller import book_blueprint
-from app.controller.ui.loan_controller import loan_blueprint
-from app.controller.ui.user_controlller import user_blueprint
-from app.database.connection import Connection
+from app.controller.ui.IU_MPrincipal import iu_mprincipal_blueprint
+from app.controller.ui.IU_LPokemon import iu_lpokemon_blueprint
+from app.database.GestorBD import GestorBD
 from config import Config
 
 
@@ -19,16 +18,29 @@ def init_db():
             conn.executescript(f.read())
         conn.close()
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Inicializar base de datos
     init_db()
+    db = GestorBD()
 
-    # Crear conexión a la base de datos
-    db = Connection()
+    # Comprobamos cuántos Pokémon tenemos en la tabla
+    res_pokes = db.execSQL("SELECT COUNT(*) as total FROM PokeEspecie")
+    total_actual = res_pokes.getInt("total") if res_pokes.next() else 0
 
+    # CAMBIO: Solo entra si realmente faltan datos.
+    # Si total_actual es 1025, el programa saltará directamente a los Blueprints.
+    if total_actual < 1025:
+        print(f"Base de datos incompleta ({total_actual}/1025). Completando descarga...")
+        db.cargar_toda_la_base_de_datos()
+    else:
+        print("Base de datos verificada: 1025 Pokémon detectados. Iniciando web...")
+
+    # Registrar Blueprints
+    app.register_blueprint(iu_mprincipal_blueprint(db))
+    app.register_blueprint(iu_lpokemon_blueprint(db))
     app.register_blueprint(user_blueprint(db))
     app.register_blueprint(book_blueprint(db))
     app.register_blueprint(loan_blueprint(db))
