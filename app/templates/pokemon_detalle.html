@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ p.name }} - Detalle</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="header">
+            <div class="titulo">
+                {{ p.name }} <span class="detail-number">#{{ "%03d" | format(p.id) }}</span>
+            </div>
+            <button onclick="window.history.back()" class="btn-filter-trigger">Volver</button>
+        </div>
+
+        <div class="detail-card-modern">
+            <div class="detail-visual">
+                <div class="image-container-inner">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{{ p.id }}.png" alt="{{ p.name }}">
+                </div>
+            </div>
+
+            <div class="detail-data">
+                <div class="data-section">
+                    <h3>Información General</h3>
+                    <div class="info-grid-modern">
+                        <div class="info-item"><strong>Tipos</strong> {{ p.types | join(' / ') }}</div>
+                        <div class="info-item"><strong>Peso</strong> {{ p.weight }} kg</div>
+                        <div class="info-item"><strong>Habilidades</strong> {{ p.abilities | join(', ') }}</div>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3>Estadísticas Base</h3>
+                    <div class="stats-container">
+                        {% set stats_map = [
+                            ('PS', p.stats.ps, 'hp'),
+                            ('Ataque', p.stats.attack, 'atk'),
+                            ('Defensa', p.stats.defense, 'def'),
+                            ('Atq. Esp', p.stats.special_attack, 'spa'),
+                            ('Def. Esp', p.stats.special_defense, 'spd'),
+                            ('Velocidad', p.stats.speed, 'spe')
+                        ] %}
+
+                        {% for label, value, class in stats_map %}
+                        <div class="stat-row">
+                            <span class="stat-label">{{ label }}</span>
+                            <span class="stat-value">{{ value }}</span>
+                            <div class="bar-bg">
+                                <div class="bar-fill {{ class }}" style="width: {{ (value / 255) * 100 }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if p.evolution %}
+                <div class="data-section">
+                    <h3>Línea Evolutiva</h3>
+                    <div class="evo-flex-modern">
+                        {% for evo in p.evolution %}
+                        <div class="evo-box-modern {{ 'active' if evo.id == p.id else '' }}"
+                             onclick="window.location.href='/pokemon/{{ evo.id }}'">
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ evo.id }}.png">
+                            <span>{{ evo.name }}</span>
+                        </div>
+                        {% if not loop.last %}<div class="evo-arrow">➜</div>{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

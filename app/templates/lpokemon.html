@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pokédex</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {# Filtros actuales para usar en las cabeceras de ordenación #}
+    {% set filtros_solo = "&nombre=" ~ request.args.get('nombre', '') ~
+                          "&tipo=" ~ request.args.get('tipo', '') ~
+                          "&habilidad=" ~ request.args.get('habilidad', '') %}
+
+    {# Parámetros completos (filtros + orden) para la paginación #}
+    {% set params = filtros_solo ~
+                    "&order_by=" ~ (order_by if order_by else 'id') ~
+                    "&direction=" ~ (direction if direction else 'ASC') %}
+
+    <div class="main-wrapper">
+        <div class="header">
+            <div class="titulo">Pokédex</div>
+
+            <div class="filter-container">
+                <button type="button" class="btn-filter-trigger" id="toggleFilters">
+                    Filtrar
+                </button>
+
+                <div class="filter-panel" id="filterContent">
+                    <form action="/lpokemon" method="GET" id="pokemonFilterForm">
+                        <div class="filter-field">
+                            <label>Name</label>
+                            <input type="text" id="nombreInput" placeholder="Press Enter...">
+                            <div id="nombreTags" class="tag-container"></div>
+                            <input type="hidden" name="nombre" id="nombreHidden" value="{{ request.args.get('nombre', '') }}">
+                        </div>
+
+                        <div class="filter-field">
+                            <label>Types</label>
+                            <input list="lista-tipos" id="tipoInput" placeholder="Select type...">
+                            <datalist id="lista-tipos">
+                                {% for t in todos_los_tipos %}
+                                    <option value="{{ t }}">
+                                {% endfor %}
+                            </datalist>
+                            <div id="tipoTags" class="tag-container"></div>
+                            <input type="hidden" name="tipo" id="tipoHidden" value="{{ request.args.get('tipo', '') }}">
+                        </div>
+
+                        <div class="filter-field">
+                            <label>Abilities</label>
+                            <input list="lista-habs" id="habInput" placeholder="Select ability...">
+                            <datalist id="lista-habs">
+                                {% for h in todas_las_habilidades %}
+                                    <option value="{{ h }}">
+                                {% endfor %}
+                            </datalist>
+                            <div id="habTags" class="tag-container"></div>
+                            <input type="hidden" name="habilidad" id="habHidden" value="{{ request.args.get('habilidad', '') }}">
+                        </div>
+
+                        <button type="submit" class="btn-apply">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <table class="lista-table">
+            <thead>
+                <tr>
+                    <th class="id-col">
+                        <a href="/lpokemon?order_by=id&direction={{ 'DESC' if order_by == 'id' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
+                            Nº
+                            <span class="sort-arrow">
+                                {% if order_by == 'id' %}{{ '▲' if direction == 'ASC' else '▼' }}{% endif %}
+                            </span>
+                        </a>
+                    </th>
+                    <th class="img-col">FOTO</th>
+                    <th class="name-col">
+                        <a href="/lpokemon?order_by=nombre&direction={{ 'DESC' if order_by == 'nombre' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
+                            NOMBRE
+                            <span class="sort-arrow">
+                                {% if order_by == 'nombre' %}{{ '▲' if direction == 'ASC' else '▼' }}{% endif %}
+                            </span>
+                        </a>
+                    </th>
+                    <th class="type-col">
+                        <a href="/lpokemon?order_by=tipos&direction={{ 'DESC' if order_by == 'tipos' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
+                            TIPOS
+                            <span class="sort-arrow">
+                                {% if order_by == 'tipos' %}{{ '▲' if direction == 'ASC' else '▼' }}{% endif %}
+                            </span>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pokemons %}
+                <tr onclick="window.location.href='/pokemon/{{ p.id }}'" style="cursor: pointer;">
+                    <td class="id-col">{{ "%04d" | format(p.id) }}</td>
+                    <td class="img-col"><img src="{{ p.imagen }}" class="img-pokemon"></td>
+                    <td class="name-col">{{ p.nombre }}</td>
+                    <td class="type-col">{{ p.tipos }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if pagina > 1 %}
+                <a href="/lpokemon?page={{ pagina - 1 }}{{ params }}" class="btn-page">Anterior</a>
+            {% endif %}
+
+            {% for p in rango %}
+                <a href="/lpokemon?page={{ p }}{{ params }}" class="btn-page {{ 'active' if p == pagina else '' }}">
+                    {{ p }}
+                </a>
+            {% endfor %}
+
+            {% if pagina < total_p %}
+                <a href="/lpokemon?page={{ pagina + 1 }}{{ params }}" class="btn-page">Siguiente</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/filtros.js') }}"></script>
+</body>
+</html>
