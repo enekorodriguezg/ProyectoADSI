@@ -4,22 +4,16 @@ class Catalogo:
 
     def obtenerListaPokemon(self, pagina, filtros, order_by='id', direction='ASC'):
         offset = (pagina - 1) * 25
-
-        # 1. Definimos las cláusulas WHERE basándonos en los filtros
         where_clauses = []
         if filtros.get("nombre"):
             where_clauses.append(f"P.name LIKE '%{filtros['nombre']}%'")
-
-        # Filtro por tipo requiere buscar en la tabla EsTipo
         if filtros.get("tipo"):
             where_clauses.append(f"(E.type1 = '{filtros['tipo']}' OR E.type2 = '{filtros['tipo']}')")
 
         where_str = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
-        # 2. SQL con JOIN para obtener los tipos junto a la especie
-        # Usamos alias P para PokeEspecie y E para EsTipo
         sql = f"""
-            SELECT P.id_pokedex, P.name, E.type1, E.type2 
+            SELECT P.id_pokedex, P.name
             FROM PokeEspecie P
             LEFT JOIN EsTipo E ON P.id_pokedex = E.id_pokemon
             {where_str} 
@@ -31,51 +25,47 @@ class Catalogo:
         lista = []
         while res.next():
             id_pk = res.getInt("id_pokedex")
-            t1 = res.getString("type1")
-            t2 = res.getString("type2")
-
-            # Formateamos el string de tipos para la tabla
-            tipos_str = t1 if t1 else "Normal"
-            if t2:
-                tipos_str += f" / {t2}"
-
+            tipos_lista = self.getTiposSQL(id_pk)
             lista.append({
                 "id": id_pk,
                 "nombre": res.getString("name"),
                 "imagen": f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{id_pk}.png",
-                "tipos": tipos_str
+                "tipos": " / ".join(tipos_lista)
             })
         return lista
 
+    # ESTA ES LA FUNCIÓN QUE FALTABA SEGÚN TU ERROR
     def contarPokemonFiltrados(self, filtros):
-        if not filtros.get("tipo"):
-            # Si no hay filtro de tipo, conteo simple en PokeEspecie
-            where = f"WHERE name LIKE '%{filtros['nombre']}%'" if filtros.get("nombre") else ""
-            res = self.db.execSQL(f"SELECT COUNT(*) as total FROM PokeEspecie {where}")
-        else:
-            # Si hay filtro de tipo, necesitamos unir las tablas
-            res = self.db.execSQL(f"""
-                SELECT COUNT(*) as total FROM PokeEspecie P
+        where_clauses = []
+        if filtros.get("nombre"):
+            where_clauses.append(f"P.name LIKE '%{filtros['nombre']}%'")
+
+        if filtros.get("tipo"):
+            where_clauses.append(f"(E.type1 = '{filtros['tipo']}' OR E.type2 = '{filtros['tipo']}')")
+            sql = f"""
+                SELECT COUNT(DISTINCT P.id_pokedex) as total 
+                FROM PokeEspecie P
                 JOIN EsTipo E ON P.id_pokedex = E.id_pokemon
-                WHERE (E.type1 = '{filtros['tipo']}' OR E.type2 = '{filtros['tipo']}')
-                {"AND P.name LIKE '%" + filtros['nombre'] + "%'" if filtros.get('nombre') else ""}
-            """)
+                {" WHERE " + " AND ".join(where_clauses) if where_clauses else ""}
+            """
+        else:
+            where_str = f" WHERE name LIKE '%{filtros['nombre']}%'" if filtros.get("nombre") else ""
+            sql = f"SELECT COUNT(*) as total FROM PokeEspecie {where_str}"
+
+        res = self.db.execSQL(sql)
         return res.getInt("total") if res.next() else 0
 
     def obtenerDetallePokemon(self, id_pokemon):
-        sql = f"""
-            SELECT id_pokedex, name, weight, ps, attack, defense, 
-                   special_attack, special_defense, speed
-            FROM PokeEspecie 
-            WHERE id_pokedex = {id_pokemon}
-        """
+        sql = f"SELECT * FROM PokeEspecie WHERE id_pokedex = {id_pokemon}"
         res = self.db.execSQL(sql)
         if not res.next(): return None
 
         return {
             "id": res.getInt("id_pokedex"),
             "name": res.getString("name"),
+            "description": res.getString("description"),
             "weight": res.getFloat("weight"),
+            "height": res.getFloat("height"),
             "stats": {
                 "ps": res.getInt("ps"),
                 "attack": res.getInt("attack"),
@@ -90,50 +80,52 @@ class Catalogo:
         }
 
     def getCadenaEvolutivaSQL(self, id_pokemon):
-        """Busca la raíz de la familia y devuelve todos sus miembros"""
-        # 1. Encontrar la base de la familia (recursivo hacia atrás)
         id_raiz = id_pokemon
         while True:
-            res_padre = self.db.execSQL(f"SELECT id_base FROM Evoluciona WHERE id_evolution = {id_raiz}")
-            if res_padre.next():
-                id_raiz = res_padre.getInt("id_base")
+            res_p = self.db.execSQL(f"SELECT id_base FROM Evoluciona WHERE id_evolution = {id_raiz}")
+            if res_p.next():
+                id_raiz = res_p.getInt("id_base")
             else:
                 break
 
-        # 2. Obtener toda la familia en orden
-        sql_familia = f"""
-            SELECT id_pokedex, name FROM PokeEspecie 
-            WHERE id_pokedex = {id_raiz}
-            OR id_pokedex IN (SELECT id_evolution FROM Evoluciona WHERE id_base = {id_raiz})
-            OR id_pokedex IN (SELECT id_evolution FROM Evoluciona WHERE id_base IN 
-                (SELECT id_evolution FROM Evoluciona WHERE id_base = {id_raiz}))
-            ORDER BY id_pokedex ASC
-        """
-        res_fam = self.db.execSQL(sql_familia)
-        cadena = []
-        while res_fam.next():
-            cadena.append({
-                "id": res_fam.getInt("id_pokedex"),
-                "name": res_fam.getString("name")
-            })
-        return cadena
+        def get_pk_data(id_pk):
+            res = self.db.execSQL(f"SELECT name FROM PokeEspecie WHERE id_pokedex = {id_pk}")
+            nombre = res.getString("name") if res.next() else "???"
+            return {"id": id_pk, "name": nombre, "types": self.getTiposSQL(id_pk)}
+
+        etapa1 = [get_pk_data(id_raiz)]
+
+        etapa2 = []
+        ids_e2 = []
+        res_e2 = self.db.execSQL(f"SELECT id_evolution FROM Evoluciona WHERE id_base = {id_raiz}")
+        while res_e2.next():
+            id_e2 = res_e2.getInt("id_evolution")
+            etapa2.append(get_pk_data(id_e2))
+            ids_e2.append(str(id_e2))
+
+        etapa3 = []
+        if ids_e2:
+            res_e3 = self.db.execSQL(
+                f"SELECT id_evolution, id_base FROM Evoluciona WHERE id_base IN ({','.join(ids_e2)})")
+            while res_e3.next():
+                p_e3 = get_pk_data(res_e3.getInt("id_evolution"))
+                p_e3["id_padre"] = res_e3.getInt("id_base")
+                etapa3.append(p_e3)
+
+        return {"e1": etapa1, "e2": etapa2, "e3": etapa3}
 
     def getTiposSQL(self, id_pokemon):
-        """2.4.1: Obtiene lista de tipos desde EsTipo"""
-        sql = f"SELECT type1, type2 FROM EsTipo WHERE id_pokemon = {id_pokemon}"
-        res = self.db.execSQL(sql)
+        res = self.db.execSQL(f"SELECT type1, type2 FROM EsTipo WHERE id_pokemon = {id_pokemon}")
         tipos = []
         if res.next():
-            tipos.append(res.getString("type1"))
-            t2 = res.getString("type2")
-            if t2: tipos.append(t2)
+            for t in [res.getString("type1"), res.getString("type2")]:
+                if t and t.lower() != 'none': tipos.append(t)
         return tipos
 
     def getHabilidadesSQL(self, id_pokemon):
-        """Obtiene las habilidades desde HabilidadesPosibles"""
-        sql = f"SELECT ability_name FROM HabilidadesPosibles WHERE id_pokemon = {id_pokemon}"
-        res = self.db.execSQL(sql)
+        res = self.db.execSQL(f"SELECT ability_name FROM HabilidadesPosibles WHERE id_pokemon = {id_pokemon}")
         habs = []
         while res.next():
-            habs.append(res.getString("ability_name"))
+            h = res.getString("ability_name")
+            if h and h.lower() != 'none': habs.append(h)
         return habs

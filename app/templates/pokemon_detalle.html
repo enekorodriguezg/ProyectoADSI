@@ -7,6 +7,10 @@
 </head>
 <body>
     <div class="main-wrapper">
+        <div class="nav-top">
+            <a href="/" class="btn-pokedex-logo">Pokédex</a>
+        </div>
+
         <div class="header">
             <div class="titulo">
                 {{ p.name }} <span class="detail-number">#{{ "%03d" | format(p.id) }}</span>
@@ -22,11 +26,14 @@
             </div>
 
             <div class="detail-data">
+                {% if p.description %}<div class="description-box">{{ p.description }}</div>{% endif %}
+
                 <div class="data-section">
                     <h3>Información General</h3>
                     <div class="info-grid-modern">
                         <div class="info-item"><strong>Tipos</strong> {{ p.types | join(' / ') }}</div>
                         <div class="info-item"><strong>Peso</strong> {{ p.weight }} kg</div>
+                        <div class="info-item"><strong>Altura</strong> {{ p.height }} m</div>
                         <div class="info-item"><strong>Habilidades</strong> {{ p.abilities | join(', ') }}</div>
                     </div>
                 </div>
@@ -34,22 +41,12 @@
                 <div class="data-section">
                     <h3>Estadísticas Base</h3>
                     <div class="stats-container">
-                        {% set stats_map = [
-                            ('PS', p.stats.ps, 'hp'),
-                            ('Ataque', p.stats.attack, 'atk'),
-                            ('Defensa', p.stats.defense, 'def'),
-                            ('Atq. Esp', p.stats.special_attack, 'spa'),
-                            ('Def. Esp', p.stats.special_defense, 'spd'),
-                            ('Velocidad', p.stats.speed, 'spe')
-                        ] %}
-
+                        {% set stats_map = [('PS', p.stats.ps, 'hp'), ('Ataque', p.stats.attack, 'atk'), ('Defensa', p.stats.defense, 'def'), ('Atq. Esp', p.stats.special_attack, 'spa'), ('Def. Esp', p.stats.special_defense, 'spd'), ('Velocidad', p.stats.speed, 'spe')] %}
                         {% for label, value, class in stats_map %}
                         <div class="stat-row">
                             <span class="stat-label">{{ label }}</span>
                             <span class="stat-value">{{ value }}</span>
-                            <div class="bar-bg">
-                                <div class="bar-fill {{ class }}" style="width: {{ (value / 255) * 100 }}%"></div>
-                            </div>
+                            <div class="bar-bg"><div class="bar-fill {{ class }}" style="width: {{ (value / 255) * 100 }}%"></div></div>
                         </div>
                         {% endfor %}
                     </div>
@@ -59,14 +56,44 @@
                 <div class="data-section">
                     <h3>Línea Evolutiva</h3>
                     <div class="evo-flex-modern">
-                        {% for evo in p.evolution %}
-                        <div class="evo-box-modern {{ 'active' if evo.id == p.id else '' }}"
-                             onclick="window.location.href='/pokemon/{{ evo.id }}'">
-                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ evo.id }}.png">
-                            <span>{{ evo.name }}</span>
+                        <div class="evo-stage">
+                            {% for evo in p.evolution.e1 %}
+                                <div class="evo-box-modern {{ 'active' if evo.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ evo.id }}'">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ evo.id }}.png">
+                                    <span>{{ evo.name }}</span>
+                                    <div class="evo-types">
+                                        {% for t in evo.types %}<div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>{% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
-                        {% if not loop.last %}<div class="evo-arrow">➜</div>{% endif %}
-                        {% endfor %}
+
+                        {% if p.evolution.e2 %}
+                        <div class="evo-arrow">➜</div>
+                        <div class="evo-branches-container">
+                            {% for e2_pk in p.evolution.e2 %}
+                                <div class="evo-branch-path">
+                                    <div class="evo-box-modern {{ 'active' if e2_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e2_pk.id }}'">
+                                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e2_pk.id }}.png">
+                                        <span>{{ e2_pk.name }}</span>
+                                        <div class="evo-types">
+                                            {% for t in e2_pk.types %}<div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>{% endfor %}
+                                        </div>
+                                    </div>
+                                    {% for e3_pk in p.evolution.e3 %}{% if e3_pk.id_padre == e2_pk.id %}
+                                        <div class="evo-arrow">➜</div>
+                                        <div class="evo-box-modern {{ 'active' if e3_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e3_pk.id }}'">
+                                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e3_pk.id }}.png">
+                                            <span>{{ e3_pk.name }}</span>
+                                            <div class="evo-types">
+                                                {% for t in e3_pk.types %}<div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>{% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}{% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endif %}

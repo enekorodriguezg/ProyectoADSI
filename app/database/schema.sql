@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS Habilidad (
 CREATE TABLE IF NOT EXISTS PokeEspecie (
     id_pokedex INT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    description VARCHAR(1000) NOT NULL,
     weight DECIMAL(10,2),
+    height DECIMAL(10,2),
     ps INT,
     attack INT,
     defense INT,

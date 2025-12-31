@@ -18,7 +18,10 @@
 
     <div class="main-wrapper">
         <div class="header">
-            <div class="titulo">Pokédex</div>
+            {# TÍTULO QUE VUELVE AL INICIO (ROOT) #}
+            <a href="/" style="text-decoration: none; color: inherit;">
+                <div class="titulo">Pokédex</div>
+            </a>
 
             <div class="filter-container">
                 <button type="button" class="btn-filter-trigger" id="toggleFilters">
@@ -29,6 +32,7 @@
                     <form action="/lpokemon" method="GET" id="pokemonFilterForm">
                         <div class="filter-field">
                             <label>Name</label>
+                            {# Buscará por apariciones (ej: 'saur' -> Bulbasaur) #}
                             <input type="text" id="nombreInput" placeholder="Press Enter...">
                             <div id="nombreTags" class="tag-container"></div>
                             <input type="hidden" name="nombre" id="nombreHidden" value="{{ request.args.get('nombre', '') }}">
@@ -100,6 +104,7 @@
                     <td class="id-col">{{ "%04d" | format(p.id) }}</td>
                     <td class="img-col"><img src="{{ p.imagen }}" class="img-pokemon"></td>
                     <td class="name-col">{{ p.nombre }}</td>
+                    {# Los tipos aparecerán sin 'None' gracias a la corrección en Catalogo.py #}
                     <td class="type-col">{{ p.tipos }}</td>
                 </tr>
                 {% endfor %}

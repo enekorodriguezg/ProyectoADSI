@@ -41,8 +41,5 @@ def create_app():
     # Registrar Blueprints
     app.register_blueprint(iu_mprincipal_blueprint(db))
     app.register_blueprint(iu_lpokemon_blueprint(db))
-    app.register_blueprint(user_blueprint(db))
-    app.register_blueprint(book_blueprint(db))
-    app.register_blueprint(loan_blueprint(db))
 
     return app

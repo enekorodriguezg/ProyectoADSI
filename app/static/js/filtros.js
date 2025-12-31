@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         nContainer.innerHTML = '';
         if (nHidden.value) {
             const tag = document.createElement('div');
-            tag.className = 'tag';
+            tag.className = 'tag'; // El nombre se queda con el rojo por defecto
             tag.innerHTML = `${nHidden.value} <span onclick="removeNombre()">×</span>`;
             nContainer.appendChild(tag);
         }
@@ -36,14 +36,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Enter') {
             e.preventDefault();
             if (this.value.trim() !== "") {
-                nHidden.value = this.value.trim();
+                nHidden.value = this.value.trim(); // Se guarda "saur", "pika", etc.
                 this.value = "";
                 renderNombreTag();
             }
         }
     });
 
-    // Definimos las funciones en el objeto window para que el HTML las encuentre
     window.removeNombre = function() {
         nHidden.value = "";
         renderNombreTag();
@@ -65,7 +64,13 @@ document.addEventListener('DOMContentLoaded', function() {
             items.forEach(item => {
                 const tag = document.createElement('div');
                 tag.className = 'tag';
-                // Usamos una función global simplificada para borrar
+
+                // LÓGICA DE COLOR PARA TIPOS
+                if (containerId === 'tipoTags') {
+                    // Añade clase 'tag-fire', 'tag-water', etc.
+                    tag.classList.add('tag-' + item.toLowerCase());
+                }
+
                 tag.innerHTML = `${item} <span onclick="deleteGlobalItem('${item}', '${hiddenId}')">×</span>`;
                 container.appendChild(tag);
             });
@@ -87,13 +92,17 @@ document.addEventListener('DOMContentLoaded', function() {
         render();
     }
 
-    // Función global para borrar cualquier item de tipo/habilidad
     window.deleteGlobalItem = function(val, hId) {
         const hField = document.getElementById(hId);
         let currentItems = hField.value.split(',').filter(x => x !== val && x !== "");
         hField.value = currentItems.join(',');
 
-        // Enviamos el formulario automáticamente para que el filtro se actualice
+        // Actualizar vista de tags antes de enviar
+        const containerId = hId.replace('Hidden', 'Tags');
+        const listId = hId === 'tipoHidden' ? 'lista-tipos' : 'lista-habs';
+        const inputId = hId === 'tipoHidden' ? 'tipoInput' : 'habInput';
+
+        // Opcional: Si quieres que se envíe solo al dar a "Apply Filters", comenta la siguiente línea
         document.getElementById('pokemonFilterForm').submit();
     };
 

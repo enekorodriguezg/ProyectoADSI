@@ -16,12 +16,6 @@ def iu_lpokemon_blueprint(db):
             WHERE E.id_base = 1
         """)
 
-        print("--- COMPROBACIÓN DE EVOLUCIÓN ---")
-        if res.next():
-            print(f"La evolución de Bulbasaur es: {res.getString('name')}")
-        else:
-            print("ALERTA: No se han encontrado datos de evolución.")
-
         # 1. Captura de parámetros (Paginación y Orden)
         page = request.args.get('page', 1, type=int)
         order_by = request.args.get('order_by', 'id')

@@ -1,4 +1,4 @@
-/* --- TUS ESTILOS ORIGINALES (MANTENIDOS) --- */
+/* --- 1. ESTILOS GENERALES Y BASE --- */
 body {
     display: flex;
     justify-content: center;
@@ -29,6 +29,36 @@ body {
     text-transform: uppercase;
 }
 
+/* --- 2. NAVEGACIÓN SUPERIOR (BOTÓN POKÉDEX) --- */
+.nav-top {
+    width: 100%;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.btn-pokedex-logo {
+    background: #ee1515;
+    color: white;
+    display: inline-block;
+    padding: 10px 40px;
+    font-weight: bold;
+    font-size: 22px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 12px 12px 12px 0;
+    box-shadow: 4px 4px 0px #333;
+    transition: transform 0.1s, box-shadow 0.1s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-pokedex-logo:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #333;
+}
+
+/* --- 3. TABLA DE LISTA POKÉMON --- */
 .lista-table {
     width: 100%;
     border-collapse: collapse;
@@ -70,14 +100,6 @@ body {
     color: #ee1515;
 }
 
-.sort-arrow {
-    margin-left: 8px;
-    font-size: 12px;
-    color: #ee1515;
-    display: inline-block;
-    width: 12px;
-}
-
 .id-col { width: 12%; text-align: center; color: #888; }
 .img-col { width: 15%; text-align: center; }
 .name-col { width: 38%; text-align: center; font-weight: bold; color: #2c3e50; }
@@ -89,6 +111,7 @@ td.type-col { font-style: italic; }
     height: 50px;
 }
 
+/* --- 4. SISTEMA DE FILTROS --- */
 .filter-container {
     position: relative;
 }
@@ -103,10 +126,6 @@ td.type-col { font-style: italic; }
     font-weight: bold;
     font-size: 16px;
     transition: background 0.3s;
-}
-
-.btn-filter-trigger:hover {
-    background: #666;
 }
 
 .filter-panel {
@@ -146,10 +165,6 @@ td.type-col { font-style: italic; }
     outline: none;
 }
 
-.filter-field input:focus {
-    border-color: #ff0000;
-}
-
 .btn-apply {
     width: 100%;
     padding: 12px;
@@ -160,13 +175,9 @@ td.type-col { font-style: italic; }
     font-weight: bold;
     font-size: 16px;
     cursor: pointer;
-    transition: transform 0.1s;
 }
 
-.btn-apply:active {
-    transform: scale(0.95);
-}
-
+/* --- 5. TAGS DE FILTRO --- */
 .tag-container {
     display: flex;
     flex-wrap: wrap;
@@ -176,8 +187,8 @@ td.type-col { font-style: italic; }
 }
 
 .tag {
-    background: #ff0000;
-    color: white;
+    background-color: #f0f0f0;
+    color: #333 !important;
     padding: 3px 10px;
     border-radius: 15px;
     font-size: 11px;
@@ -185,6 +196,7 @@ td.type-col { font-style: italic; }
     align-items: center;
     font-weight: bold;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid #ccc;
 }
 
 .tag span {
@@ -192,8 +204,30 @@ td.type-col { font-style: italic; }
     cursor: pointer;
     font-size: 14px;
     line-height: 1;
+    color: #ee1515;
 }
 
+/* Colores de tipos */
+.tag-fire     { background-color: #F08030 !important; color: white !important; border: none; }
+.tag-water    { background-color: #6890F0 !important; color: white !important; border: none; }
+.tag-grass    { background-color: #78C850 !important; color: white !important; border: none; }
+.tag-electric { background-color: #F8D030 !important; color: #333 !important;  border: none; }
+.tag-ice      { background-color: #98D8D8 !important; color: #333 !important;  border: none; }
+.tag-fighting { background-color: #C03028 !important; color: white !important; border: none; }
+.tag-poison   { background-color: #A040A0 !important; color: white !important; border: none; }
+.tag-ground   { background-color: #E0C068 !important; color: #333 !important;  border: none; }
+.tag-flying   { background-color: #A890F0 !important; color: white !important; border: none; }
+.tag-psychic  { background-color: #F85888 !important; color: white !important; border: none; }
+.tag-bug      { background-color: #A8B820 !important; color: white !important; border: none; }
+.tag-rock     { background-color: #B8A038 !important; color: white !important; border: none; }
+.tag-ghost    { background-color: #705898 !important; color: white !important; border: none; }
+.tag-dragon   { background-color: #7038F8 !important; color: white !important; border: none; }
+.tag-dark     { background-color: #705848 !important; color: white !important; border: none; }
+.tag-steel    { background-color: #B8B8D0 !important; color: #333 !important;  border: none; }
+.tag-fairy    { background-color: #EE99AC !important; color: white !important; border: none; }
+.tag-normal   { background-color: #A8A878 !important; color: white !important; border: none; }
+
+/* --- 6. PAGINACIÓN --- */
 .pagination {
     display: flex;
     justify-content: center;
@@ -208,11 +242,6 @@ td.type-col { font-style: italic; }
     text-decoration: none;
     border-radius: 8px;
     color: #333;
-    transition: 0.2s;
-}
-
-.btn-page:hover {
-    background: #f0f0f0;
 }
 
 .btn-page.active {
@@ -222,14 +251,7 @@ td.type-col { font-style: italic; }
     font-weight: bold;
 }
 
-/* --- ESTILOS DE DETALLE MANTENIDOS --- */
-.detail-number {
-    color: #aaa;
-    font-weight: normal;
-    margin-left: 10px;
-    font-size: 22px;
-}
-
+/* --- 7. VISTA DE DETALLE --- */
 .detail-card-modern {
     display: flex;
     background: white;
@@ -238,41 +260,48 @@ td.type-col { font-style: italic; }
     gap: 40px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     margin-bottom: 40px;
+    align-items: flex-start;
+}
+
+.detail-visual {
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .image-container-inner {
     background: #f9f9f9;
     border-radius: 15px;
     padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    text-align: center;
 }
 
 .image-container-inner img {
     width: 100%;
-    max-width: 280px;
-    filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.1));
-    transition: transform 0.3s ease;
-}
-
-.image-container-inner img:hover {
-    transform: scale(1.05);
+    max-width: 250px;
+    height: auto;
 }
 
 .detail-data {
     flex: 1;
 }
 
-.data-section {
-    margin-bottom: 25px;
+.description-box {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f1f2f6;
+    border-radius: 12px;
+    font-style: italic;
+    color: #555;
+    line-height: 1.5;
+    border-left: 4px solid #ee1515;
 }
 
 .data-section h3 {
     font-size: 14px;
     color: #ee1515;
     text-transform: uppercase;
-    letter-spacing: 1px;
     border-bottom: 1px solid #eee;
     padding-bottom: 5px;
     margin-bottom: 15px;
@@ -284,34 +313,13 @@ td.type-col { font-style: italic; }
     gap: 15px;
 }
 
-.info-item {
-    font-size: 16px;
-    color: #444;
-}
-
 .info-item strong {
     display: block;
     font-size: 12px;
     color: #999;
-    text-transform: uppercase;
 }
 
-/* --- ADICIONES PARA DETALLE COMPLETO --- */
-
-/* Caja de descripción dinámica */
-.description-box {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f1f2f6;
-    border-radius: 12px;
-    font-style: italic;
-    color: #555;
-    line-height: 1.5;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* Contenedor de las 6 barras de estadísticas */
+/* --- 8. ESTADÍSTICAS --- */
 .stats-container {
     display: flex;
     flex-direction: column;
@@ -331,14 +339,6 @@ td.type-col { font-style: italic; }
     color: #666;
 }
 
-.stat-value {
-    width: 30px;
-    font-size: 13px;
-    text-align: right;
-    font-weight: bold;
-}
-
-/* Redefinición de barras para soportar múltiples colores */
 .bar-bg {
     flex: 1;
     height: 10px;
@@ -353,7 +353,6 @@ td.type-col { font-style: italic; }
     transition: width 0.6s ease-in-out;
 }
 
-/* Colores específicos por estadística */
 .bar-fill.hp  { background: #FF0000; }
 .bar-fill.atk { background: #F08030; }
 .bar-fill.def { background: #F8D030; }
@@ -361,96 +360,149 @@ td.type-col { font-style: italic; }
 .bar-fill.spd { background: #78C850; }
 .bar-fill.spe { background: #F85888; }
 
-/* Evoluciones con flechas animadas */
+/* --- 9. LÍNEA EVOLUTIVA (CARRIL Y TIPOS) --- */
 .evo-flex-modern {
     display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.evo-box-modern {
-    text-align: center;
-    background: #fdfdfd;
-    padding: 10px;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.evo-box-modern:hover {
-    border-color: #ee1515;
-    transform: translateY(-3px);
-}
-
-.evo-box-modern.active {
-    background: #fff5f5;
-    border-color: #ee1515;
-    cursor: default;
-}
-
-.evo-box-modern img {
-    width: 60px;
-    height: 60px;
-}
-
-
-/* --- LINEA EVOLUTIVA --- */
-.evo-flex-modern {
-    display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     gap: 15px;
     flex-wrap: wrap;
     margin-top: 20px;
 }
 
+.evo-branches-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.evo-branch-path {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.evo-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .evo-box-modern {
     text-align: center;
     background: #fdfdfd;
-    padding: 10px;
+    padding: 10px 8px;
     border-radius: 15px;
     border: 1px solid #eee;
     cursor: pointer;
-    transition: all 0.3s ease;
+    min-width: 110px;
+    transition: transform 0.2s;
 }
 
 .evo-box-modern:hover {
-    border-color: #ee1515;
     transform: translateY(-5px);
+    border-color: #ee1515;
 }
 
 .evo-box-modern.active {
     background: #fff5f5;
     border-color: #ee1515;
-    cursor: default;
 }
 
 .evo-box-modern img {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     display: block;
     margin: 0 auto;
 }
 
 .evo-box-modern span {
-    font-size: 12px;
+    display: block;
+    font-size: 11px;
     font-weight: bold;
-    color: #333;
     text-transform: capitalize;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.evo-types {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
 }
 
 .evo-arrow {
     color: #ee1515;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
-    user-select: none;
+}
+
+/* --- 10. MENÚ PRINCIPAL --- */
+.menu-main-container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 50px auto;
+}
+
+.menu-banner {
+    background: #ee1515;
+    color: white;
+    display: inline-block;
+    padding: 12px 45px;
+    font-weight: bold;
+    font-size: 24px;
+    text-transform: uppercase;
+    border-radius: 12px 12px 12px 0;
+    margin-bottom: 40px;
+    box-shadow: 4px 4px 0px #333;
+}
+
+.menu-top-links {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: none !important;
-    transition: none !important;
-    flex-shrink: 0;
-    width: 30px;
+    gap: 20px;
+    margin-top: -30px;
+    margin-bottom: 30px;
+    justify-content: flex-end;
+}
+
+.menu-link-secondary {
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+}
+
+.menu-nav-card {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+
+.menu-nav-card:hover {
+    transform: translateY(-8px);
+    border-color: #ee1515;
+}
+
+.menu-nav-card .dot {
+    width: 10px;
+    height: 10px;
+    background: #ddd;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.menu-nav-card:hover .dot {
+    background: #ee1515;
 }
