@@ -1,3 +1,5 @@
+from app.controller.model.PokeEspecie import PokeEspecie
+
 class Catalogo:
     def __init__(self, db):
         self.db = db
@@ -26,6 +28,7 @@ class Catalogo:
         while res.next():
             id_pk = res.getInt("id_pokedex")
             tipos_lista = self.getTiposSQL(id_pk)
+            # Aquí podrías devolver objetos básicos de PokeEspecie o diccionarios simples
             lista.append({
                 "id": id_pk,
                 "nombre": res.getString("name"),
@@ -34,7 +37,6 @@ class Catalogo:
             })
         return lista
 
-    # ESTA ES LA FUNCIÓN QUE FALTABA SEGÚN TU ERROR
     def contarPokemonFiltrados(self, filtros):
         where_clauses = []
         if filtros.get("nombre"):
@@ -58,29 +60,38 @@ class Catalogo:
     def obtenerDetallePokemon(self, id_pokemon):
         sql = f"SELECT * FROM PokeEspecie WHERE id_pokedex = {id_pokemon}"
         res = self.db.execSQL(sql)
-        if not res.next(): return None
 
-        return {
-            "id": res.getInt("id_pokedex"),
-            "name": res.getString("name"),
-            "description": res.getString("description"),
-            "weight": res.getFloat("weight"),
-            "height": res.getFloat("height"),
-            "stats": {
-                "ps": res.getInt("ps"),
-                "attack": res.getInt("attack"),
-                "defense": res.getInt("defense"),
-                "special_attack": res.getInt("special_attack"),
-                "special_defense": res.getInt("special_defense"),
-                "speed": res.getInt("speed")
-            },
-            "types": self.getTiposSQL(id_pokemon),
-            "abilities": self.getHabilidadesSQL(id_pokemon),
-            "evolution": self.getCadenaEvolutivaSQL(id_pokemon)
+        if not res.next():
+            return None
+
+        # Recopilación de datos de la tabla principal
+        stats = {
+            "ps": res.getInt("ps"),
+            "attack": res.getInt("attack"),
+            "defense": res.getInt("defense"),
+            "special_attack": res.getInt("special_attack"),
+            "special_defense": res.getInt("special_defense"),
+            "speed": res.getInt("speed")
         }
+
+        # Creación de la instancia PokeEspecie con datos de tablas relacionadas
+        pokemon_obj = PokeEspecie(
+            id_pokedex=res.getInt("id_pokedex"),
+            name=res.getString("name"),
+            description=res.getString("description"),
+            weight=res.getFloat("weight"),
+            height=res.getFloat("height"),
+            stats=stats,
+            types=self.getTiposSQL(id_pokemon),
+            abilities=self.getHabilidadesSQL(id_pokemon),
+            evolution=self.getCadenaEvolutivaSQL(id_pokemon)
+        )
+
+        return pokemon_obj
 
     def getCadenaEvolutivaSQL(self, id_pokemon):
         id_raiz = id_pokemon
+        # Buscar el origen de la cadena (el primer pokémon)
         while True:
             res_p = self.db.execSQL(f"SELECT id_base FROM Evoluciona WHERE id_evolution = {id_raiz}")
             if res_p.next():
@@ -93,8 +104,10 @@ class Catalogo:
             nombre = res.getString("name") if res.next() else "???"
             return {"id": id_pk, "name": nombre, "types": self.getTiposSQL(id_pk)}
 
+        # Etapa 1
         etapa1 = [get_pk_data(id_raiz)]
 
+        # Etapa 2
         etapa2 = []
         ids_e2 = []
         res_e2 = self.db.execSQL(f"SELECT id_evolution FROM Evoluciona WHERE id_base = {id_raiz}")
@@ -103,12 +116,14 @@ class Catalogo:
             etapa2.append(get_pk_data(id_e2))
             ids_e2.append(str(id_e2))
 
+        # Etapa 3
         etapa3 = []
         if ids_e2:
             res_e3 = self.db.execSQL(
                 f"SELECT id_evolution, id_base FROM Evoluciona WHERE id_base IN ({','.join(ids_e2)})")
             while res_e3.next():
-                p_e3 = get_pk_data(res_e3.getInt("id_evolution"))
+                id_ev = res_e3.getInt("id_evolution")
+                p_e3 = get_pk_data(id_ev)
                 p_e3["id_padre"] = res_e3.getInt("id_base")
                 etapa3.append(p_e3)
 

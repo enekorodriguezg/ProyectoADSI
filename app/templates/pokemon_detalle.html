@@ -15,7 +15,9 @@
             <div class="titulo">
                 {{ p.name }} <span class="detail-number">#{{ "%03d" | format(p.id) }}</span>
             </div>
-            <button onclick="window.history.back()" class="btn-filter-trigger">Volver</button>
+            <a href="{{ return_url }}" class="btn-filter-trigger" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                    Volver
+            </a>
         </div>
 
         <div class="detail-card-modern">
@@ -41,12 +43,22 @@
                 <div class="data-section">
                     <h3>Estadísticas Base</h3>
                     <div class="stats-container">
-                        {% set stats_map = [('PS', p.stats.ps, 'hp'), ('Ataque', p.stats.attack, 'atk'), ('Defensa', p.stats.defense, 'def'), ('Atq. Esp', p.stats.special_attack, 'spa'), ('Def. Esp', p.stats.special_defense, 'spd'), ('Velocidad', p.stats.speed, 'spe')] %}
+                        {# Accedemos a p.stats (el diccionario dentro del objeto) #}
+                        {% set stats_map = [
+                            ('PS', p.stats.ps, 'hp'),
+                            ('Ataque', p.stats.attack, 'atk'),
+                            ('Defensa', p.stats.defense, 'def'),
+                            ('Atq. Esp', p.stats.special_attack, 'spa'),
+                            ('Def. Esp', p.stats.special_defense, 'spd'),
+                            ('Velocidad', p.stats.speed, 'spe')
+                        ] %}
                         {% for label, value, class in stats_map %}
                         <div class="stat-row">
                             <span class="stat-label">{{ label }}</span>
                             <span class="stat-value">{{ value }}</span>
-                            <div class="bar-bg"><div class="bar-fill {{ class }}" style="width: {{ (value / 255) * 100 }}%"></div></div>
+                            <div class="bar-bg">
+                                <div class="bar-fill {{ class }}" style="width: {{ (value / 255) * 100 }}%"></div>
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
@@ -56,40 +68,52 @@
                 <div class="data-section">
                     <h3>Línea Evolutiva</h3>
                     <div class="evo-flex-modern">
+                        {# Etapa 1 #}
                         <div class="evo-stage">
                             {% for evo in p.evolution.e1 %}
                                 <div class="evo-box-modern {{ 'active' if evo.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ evo.id }}'">
-                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ evo.id }}.png">
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ evo.id }}.png" alt="{{ evo.name }}">
                                     <span>{{ evo.name }}</span>
                                     <div class="evo-types">
-                                        {% for t in evo.types %}<div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>{% endfor %}
+                                        {% for t in evo.types %}
+                                            <div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>
+                                        {% endfor %}
                                     </div>
                                 </div>
                             {% endfor %}
                         </div>
 
+                        {# Etapa 2 y sucesivas #}
                         {% if p.evolution.e2 %}
                         <div class="evo-arrow">➜</div>
                         <div class="evo-branches-container">
                             {% for e2_pk in p.evolution.e2 %}
                                 <div class="evo-branch-path">
                                     <div class="evo-box-modern {{ 'active' if e2_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e2_pk.id }}'">
-                                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e2_pk.id }}.png">
+                                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e2_pk.id }}.png" alt="{{ e2_pk.name }}">
                                         <span>{{ e2_pk.name }}</span>
                                         <div class="evo-types">
-                                            {% for t in e2_pk.types %}<div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>{% endfor %}
+                                            {% for t in e2_pk.types %}
+                                                <div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>
+                                            {% endfor %}
                                         </div>
                                     </div>
-                                    {% for e3_pk in p.evolution.e3 %}{% if e3_pk.id_padre == e2_pk.id %}
-                                        <div class="evo-arrow">➜</div>
-                                        <div class="evo-box-modern {{ 'active' if e3_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e3_pk.id }}'">
-                                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e3_pk.id }}.png">
-                                            <span>{{ e3_pk.name }}</span>
-                                            <div class="evo-types">
-                                                {% for t in e3_pk.types %}<div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>{% endfor %}
+
+                                    {# Etapa 3 vinculada a su padre de la Etapa 2 #}
+                                    {% for e3_pk in p.evolution.e3 %}
+                                        {% if e3_pk.id_padre == e2_pk.id %}
+                                            <div class="evo-arrow">➜</div>
+                                            <div class="evo-box-modern {{ 'active' if e3_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e3_pk.id }}'">
+                                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e3_pk.id }}.png" alt="{{ e3_pk.name }}">
+                                                <span>{{ e3_pk.name }}</span>
+                                                <div class="evo-types">
+                                                    {% for t in e3_pk.types %}
+                                                        <div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>
+                                                    {% endfor %}
+                                                </div>
                                             </div>
-                                        </div>
-                                    {% endif %}{% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
                                 </div>
                             {% endfor %}
                         </div>

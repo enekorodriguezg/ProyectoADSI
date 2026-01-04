@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session
 from app.controller.model.Catalogo import Catalogo
 
 
@@ -58,6 +58,8 @@ def iu_lpokemon_blueprint(db):
         while res_habs.next():
             lista_habs.append(res_habs.getString("name"))
 
+        session['last_pokedex_url'] = request.full_path
+
         # 6. Renderizado final con todas las variables necesarias
         return render_template('lpokemon.html',
                                pokemons=lista,
@@ -78,6 +80,8 @@ def iu_lpokemon_blueprint(db):
         if not data_json:
             return "Pokémon no encontrado", 404
 
-        return render_template('pokemon_detalle.html', p=data_json)
+        return_url = session.get('last_pokedex_url', '/lpokemon')
+
+        return render_template('pokemon_detalle.html', p=data_json, return_url=return_url)
 
     return bp
