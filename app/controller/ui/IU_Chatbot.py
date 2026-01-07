@@ -12,4 +12,9 @@ def iu_chatbot_blueprint(db):
         session['chatbot_mode'] = 'compatibilidad'
         return redirect(url_for('lpokemon.mostrarLista'))
 
+    @bp.route('/chatbot/ver_cadena_evolutiva')
+    def ver_cadena_evolutiva():
+        session['chatbot_mode'] = 'consulta_evo'
+        return redirect(url_for('lpokemon.mostrarLista'))
+
     return bp

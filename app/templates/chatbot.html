@@ -19,13 +19,13 @@
         <div class="menu-banner" style="font-size: 1.5rem; margin-top: 20px;">CHATBOT</div>
 
         <div class="menu-grid" style="margin-top: 20px;">
-            <a href="#" class="menu-nav-card">
+            <a href="{{ url_for('chatbot.ver_compatibilidad') }}" class="menu-nav-card">
                 <div class="dot"></div>
                 <h2>Mostrar compatibilidad de tipos</h2>
                 <p>Muestra los tipos contra los que es fuerte y débil un Pokémon.</p>
             </a>
 
-            <a href="#" class="menu-nav-card">
+            <a href="{{ url_for('chatbot.ver_cadena_evolutiva') }}" class="menu-nav-card">
                 <div class="dot"></div>
                 <h2>Consultar cadena evolutiva</h2>
                 <p>Muestra la cadena evolutiva de un Pokémon.</p>

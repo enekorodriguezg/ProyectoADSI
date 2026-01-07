@@ -108,7 +108,9 @@
             <tbody>
                 {% for p in pokemons %}
                 <tr {% if session.get('chatbot_mode')=='compatibilidad' %}
-                    onclick="window.location.href='/compatibilidad/{{ p.id }}'" {% else %}
+                    onclick="window.location.href='/compatibilidad/{{ p.id }}'" {% elif
+                    session.get('chatbot_mode')=='consulta_evo' %}
+                    onclick="window.location.href='/cadena_evolutiva/{{ p.id }}'" {% else %}
                     onclick="window.location.href='/pokemon/{{ p.id }}'" {% endif %} style="cursor: pointer;">
                     <td class="id-col">{{ "%04d" | format(p.id) }}</td>
                     <td class="img-col"><img src="{{ p.imagen }}" class="img-pokemon"></td>
