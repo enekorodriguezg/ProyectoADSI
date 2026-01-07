@@ -3,11 +3,165 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Cadena Evolutiva</title>
+    <title>{{ p.name }} - Cadena Evolutiva</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .evo-tree-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: auto;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .detail-card-modern {
+            display: flex;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .card-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px;
+            min-width: 120px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-node.selected-node {
+            border: 3px solid #ff0000;
+            background-color: #fffde0;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+            transform: scale(1.05);
+        }
+
+        .big-sprite {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .node-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 5px;
+            text-transform: capitalize;
+        }
+
+        .children-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .children-container.vertical {
+            flex-direction: column;
+        }
+
+        .children-container.horizontal {
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .branch-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .arrow-connector {
+            font-size: 24px;
+            color: #555;
+            margin: 0 10px;
+        }
+
+        .type-tags {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Página en blanco por ahora -->
+    <div class="main-wrapper">
+        <div class="header">
+            {# Button to return to the main page #}
+            <a href="/" style="text-decoration: none; color: inherit;">
+                <div class="titulo">Pokédex</div>
+            </a>
+        </div>
+
+        <div class="detail-card-modern" style="margin-top: 20px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2>Cadena Evolutiva de {{ p.name }}</h2>
+            </div>
+
+            <div class="detail-data">
+                {% if evo_tree %}
+
+                {% macro render_node(node) %}
+                {# Wrapper for Node + Children #}
+                <div class="node-wrapper">
+                    {# The Pokemon Itself #}
+                    <div class="card-node {{ 'selected-node' if node.id == p.id else '' }}">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ node.id }}.png"
+                            alt="{{ node.name }}" class="big-sprite">
+                        <span class="node-name">{{ node.name }}</span>
+                        <div class="type-tags">
+                            {% for t in node.types %}
+                            <div class="tag tag-{{ t.lower() }}" style="font-size: 10px; padding: 2px 6px;">{{ t }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {# If it has children, render arrow and children container #}
+                    {% if node.children %}
+                    <div class="arrow-connector">➜</div>
+
+                    {# Logic: 1 child -> horizontal, >1 child -> vertical #}
+                    {% set is_vertical = node.children|length > 1 %}
+
+                    <div class="children-container {{ 'vertical' if is_vertical else 'horizontal' }}">
+                        {% for child in node.children %}
+                        <div class="branch-group" style="{{ 'padding: 10px 0;' if is_vertical else '' }}">
+                            {{ render_node(child) }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endmacro %}
+
+                <div class="evo-tree-container">
+                    {{ render_node(evo_tree) }}
+                </div>
+
+                {% else %}
+                <p style="text-align: center;">Este Pokémon no tiene evolución.</p>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; justify-content: center; margin-top: 30px;">
+                <a href="{{ url_for('chatbot.index') }}" class="btn-filter-trigger"
+                    style="text-decoration: none; padding: 10px 20px;">
+                    ChatBot
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
