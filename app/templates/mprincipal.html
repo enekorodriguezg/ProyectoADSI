@@ -1,46 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Pokédex - Inicio</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
 
-<div class="menu-main-container">
-    <div class="menu-banner">Pokédex</div>
+    <div class="menu-main-container">
+        <div class="menu-banner">Pokédex</div>
 
-    <div class="menu-top-links">
-        <a href="#" class="menu-link-secondary">Modificar Datos</a>
-        <a href="#" class="menu-link-secondary">ChangeLog</a>
+        <div class="menu-top-links">
+            <a href="#" class="menu-link-secondary">Modificar Datos</a>
+            <a href="#" class="menu-link-secondary">ChangeLog</a>
+        </div>
+
+        <div class="menu-grid">
+            <a href="{{ url_for('lpokemon.mostrarLista') }}" class="menu-nav-card">
+                <div class="dot"></div>
+                <h2>Lista Pokémon</h2>
+                <p>Explora todos los Pokémon, sus tipos y estadísticas base.</p>
+            </a>
+
+            <a href="#" class="menu-nav-card">
+                <div class="dot"></div>
+                <h2>Equipos</h2>
+                <p>Configura y analiza tus equipos de combate.</p>
+            </a>
+
+            <a href="{{ url_for('chatbot.index') }}" class="menu-nav-card">
+                <div class="dot"></div>
+                <h2>ChatBot</h2>
+                <p>Resuelve tus dudas con el asistente inteligente.</p>
+            </a>
+
+            <a href="#" class="menu-nav-card">
+                <div class="dot"></div>
+                <h2>Amigos</h2>
+                <p>Gestiona tu lista de contactos y entrenadores.</p>
+            </a>
+        </div>
     </div>
-
-    <div class="menu-grid">
-        <a href="{{ url_for('lpokemon.mostrarLista') }}" class="menu-nav-card">
-            <div class="dot"></div>
-            <h2>Lista Pokémon</h2>
-            <p>Explora todos los Pokémon, sus tipos y estadísticas base.</p>
-        </a>
-
-        <a href="#" class="menu-nav-card">
-            <div class="dot"></div>
-            <h2>Equipos</h2>
-            <p>Configura y analiza tus equipos de combate.</p>
-        </a>
-
-        <a href="#" class="menu-nav-card">
-            <div class="dot"></div>
-            <h2>ChatBot</h2>
-            <p>Resuelve tus dudas con el asistente inteligente.</p>
-        </a>
-
-        <a href="#" class="menu-nav-card">
-            <div class="dot"></div>
-            <h2>Amigos</h2>
-            <p>Gestiona tu lista de contactos y entrenadores.</p>
-        </a>
-    </div>
-</div>
 
 </body>
+
 </html>

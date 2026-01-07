@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="menu-main-container">
+        <div class="header">
+            {# TÍTULO QUE VUELVE AL INICIO (ROOT) #}
+            <a href="/" style="text-decoration: none; color: inherit;">
+                <div class="titulo">Pokédex</div>
+            </a>
+        </div>
+
+        <div class="menu-banner" style="font-size: 1.5rem; margin-top: 20px;">CHATBOT</div>
+
+        <div class="menu-grid" style="margin-top: 20px;">
+            <a href="#" class="menu-nav-card">
+                <div class="dot"></div>
+                <h2>Mostrar compatibilidad de tipos</h2>
+                <p>Muestra los tipos contra los que es fuerte y débil un Pokémon.</p>
+            </a>
+
+            <a href="#" class="menu-nav-card">
+                <div class="dot"></div>
+                <h2>Consultar cadena evolutiva</h2>
+                <p>Muestra la cadena evolutiva de un Pokémon.</p>
+            </a>
+
+            <a href="#" class="menu-nav-card">
+                <div class="dot"></div>
+                <h2>Consultar habilidades y estadísticas</h2>
+                <p>Muestra las habilidades y estadísticas de un Pokémon.</p>
+            </a>
+
+            <a href="#" class="menu-nav-card">
+                <div class="dot"></div>
+                <h2>Evaluar el mejor Pokémon del equipo</h2>
+                <p>Muestra al Pokémon que es el mejor en una estadística del equipo.</p>
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>
