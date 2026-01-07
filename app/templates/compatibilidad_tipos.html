@@ -3,11 +3,182 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Compatibilidad de Tipos</title>
+    <title>{{ p.name }} - Compatibilidad</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .compat-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .pokemon-visual {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .pokemon-visual img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+        }
+
+        .type-label-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .detail-card-modern {
+            display: flex;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .compat-table {
+            border-collapse: collapse;
+            min-width: 800px;
+            background: #fff;
+        }
+
+        .compat-table th,
+        .compat-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .compat-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .compat-table td {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .mult-x4 {
+            color: #d00000;
+            font-weight: bold;
+        }
+
+        .mult-x2 {
+            color: #e65100;
+            font-weight: bold;
+        }
+
+        .mult-x1 {
+            color: #555;
+        }
+
+        .mult-x0-5 {
+            color: #2e7d32;
+        }
+
+        .mult-x0-25 {
+            color: #1b5e20;
+            font-weight: bold;
+        }
+
+        .mult-x0 {
+            color: #666;
+            background: #eee;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Página en blanco por ahora -->
+    <div class="main-wrapper">
+        <div class="header">
+            <a href="/" style="text-decoration: none; color: inherit;">
+                <div class="titulo">Pokédex</div>
+            </a>
+        </div>
+
+        <div class="detail-card-modern" style="margin-top: 20px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2>Compatibilidad de Tipos</h2>
+            </div>
+
+            <div class="compat-container">
+                {# Sprite Top Center #}
+                <div class="pokemon-visual">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{{ p.id }}.png"
+                        alt="{{ p.name }}">
+                    <h3>{{ p.name }}</h3>
+                    <div class="type-label-container">
+                        {% for t in p.types %}
+                        <div class="tag tag-{{ t.lower() }}">{{ t }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Table with 2 rows: Type Name | Multiplier #}
+                <div class="table-responsive">
+                    <table class="compat-table">
+                        <thead>
+                            <tr>
+                                {% for item in tabla %}
+                                <th style="min-width: 60px;">
+                                    <div class="tag tag-{{ item.type.lower() }}"
+                                        style="display: inline-block; font-size: 10px; padding: 2px 6px; margin: 0 auto;">
+                                        {{ item.type }}
+                                    </div>
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                {% for item in tabla %}
+                                <td>
+                                    {% if item.multiplier == 4.0 %}
+                                    <span class="mult-x4">x4</span>
+                                    {% elif item.multiplier == 2.0 %}
+                                    <span class="mult-x2">x2</span>
+                                    {% elif item.multiplier == 1.0 %}
+                                    <span class="mult-x1">x1</span>
+                                    {% elif item.multiplier == 0.5 %}
+                                    <span class="mult-x0-5">x1/2</span>
+                                    {% elif item.multiplier == 0.25 %}
+                                    <span class="mult-x0-25">x1/4</span>
+                                    {% elif item.multiplier == 0.0 %}
+                                    <span class="mult-x0">x0</span>
+                                    {% else %}
+                                    {{ item.multiplier }}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; margin-top: 30px;">
+                <a href="{{ url_for('chatbot.index') }}" class="btn-filter-trigger"
+                    style="text-decoration: none; padding: 10px 20px;">
+                    ChatBot
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

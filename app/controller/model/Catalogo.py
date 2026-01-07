@@ -144,3 +144,38 @@ class Catalogo:
             h = res.getString("ability_name")
             if h and h.lower() != 'none': habs.append(h)
         return habs
+
+    def obtenerTablaEfectividad(self, id_pokemon):
+        # 1. Obtener tipos del Pokemon defensor
+        tipos_defensor = self.getTiposSQL(id_pokemon) # ['Grass', 'Poison']
+        
+        # 2. Obtener todos los tipos atacantes (para la tabla completa)
+        res_tipos = self.db.execSQL("SELECT name FROM Tipo ORDER BY name")
+        todos_tipos = []
+        while res_tipos.next():
+            todos_tipos.append(res_tipos.getString("name"))
+
+        tabla_resultados = []
+
+        # 3. Calcular multiplicador para cada tipo atacante
+        for tipo_atacante in todos_tipos:
+            mult_total = 1.0
+            
+            for tipo_def in tipos_defensor:
+                # Consulta directa a la tabla Efectivo
+                sql = f"""
+                    SELECT multiplier FROM Efectivo 
+                    WHERE attacker = '{tipo_atacante}' AND defender = '{tipo_def}'
+                """
+                res = self.db.execSQL(sql)
+                if res.next():
+                    mult_total *= res.getFloat("multiplier")
+            
+            # Formatear el multiplicador para mostrarlo bonito (en string si se quiere)
+            # Pero mejor devolver flotante y formatear en vista
+            tabla_resultados.append({
+                "type": tipo_atacante,
+                "multiplier": mult_total
+            })
+
+        return tabla_resultados
