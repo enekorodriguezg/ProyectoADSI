@@ -6,6 +6,7 @@ from flask import Flask
 from app.controller.ui.IU_MPrincipal import iu_mprincipal_blueprint
 from app.controller.ui.IU_LPokemon import iu_lpokemon_blueprint
 from app.controller.ui.IU_Chatbot import iu_chatbot_blueprint
+from app.controller.ui.IU_CompatibilidadTipos import iu_compatibilidad_blueprint
 from app.database.GestorBD import GestorBD
 from config import Config
 
@@ -43,5 +44,6 @@ def create_app():
     app.register_blueprint(iu_mprincipal_blueprint(db))
     app.register_blueprint(iu_lpokemon_blueprint(db))
     app.register_blueprint(iu_chatbot_blueprint(db))
+    app.register_blueprint(iu_compatibilidad_blueprint(db))
 
     return app
