@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a la Pokédex</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="landing-wrapper">
+        <div class="landing-card">
+
+            <div class="landing-logo">
+                POKÉDEX
+            </div>
+
+            <p class="landing-text">
+                Bienvenido, entrenador. Gestiona tus equipos, analiza estadísticas y completa tu colección.
+            </p>
+
+            <div class="landing-buttons">
+                <a href="{{ url_for('iu_mprincipal.login') }}" class="btn-big btn-primary">
+                    Iniciar Sesión
+                </a>
+
+                <a href="{{ url_for('iu_mprincipal.registro') }}" class="btn-big btn-secondary">
+                    Crear Cuenta
+                </a>
+            </div>
+
+            <div class="landing-footer">
+                v1.0 - Sistema de Gestión Pokémon
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -12,9 +12,20 @@
     <div class="menu-main-container">
         <div class="menu-banner">Pokédex</div>
 
-        <div class="menu-top-links">
+        <div class="menu-top-links" style="display: flex; align-items: center; gap: 15px;">
             <a href="#" class="menu-link-secondary">Modificar Datos</a>
             <a href="#" class="menu-link-secondary">ChangeLog</a>
+
+            <span style="color: #ccc;">|</span>
+
+            <span style="color: #444; font-size: 0.9em;">
+                Usuario: <strong>{{ session['user'] }}</strong>
+                {% if session['role'] == 'ADMIN' %}(ADMIN){% endif %}
+            </span>
+
+            <a href="{{ url_for('iu_mprincipal.logout') }}" class="menu-link-secondary" style="color: #e74c3c;">
+                Cerrar Sesión
+            </a>
         </div>
 
         <div class="menu-grid">

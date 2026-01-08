@@ -1,4 +1,4 @@
--- 1. Tablas Maestras (Sin dependencias)
+-- 1. Tablas Maestras
 CREATE TABLE IF NOT EXISTS Tipo (
     name VARCHAR(50) PRIMARY KEY
 );
@@ -31,9 +31,10 @@ CREATE TABLE IF NOT EXISTS Evoluciona (
     FOREIGN KEY (id_evolution) REFERENCES PokeEspecie(id_pokedex)
 );
 
--- 3. Usuarios y sus interacciones
+-- 3. Usuarios (CORREGIDO)
 CREATE TABLE IF NOT EXISTS Users (
     username VARCHAR(50) PRIMARY KEY,
+    password VARCHAR(100), -- ¡Importante la coma al final!
     fav_pokemon INT,
     name VARCHAR(100),
     surname VARCHAR(100),
@@ -51,7 +52,7 @@ CREATE TABLE IF NOT EXISTS Amigo (
 );
 
 CREATE TABLE IF NOT EXISTS Mensaje (
-    id_message INTEGER PRIMARY KEY AUTOINCREMENT, -- En SQLite SERIAL es INTEGER PRIMARY KEY AUTOINCREMENT
+    id_message INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(50),
     message_text TEXT,
     date_hour TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
