@@ -11,13 +11,16 @@ class Catalogo:
             where_clauses.append(f"P.name LIKE '%{filtros['nombre']}%'")
         if filtros.get("tipo"):
             where_clauses.append(f"(E.type1 = '{filtros['tipo']}' OR E.type2 = '{filtros['tipo']}')")
+        if filtros.get("habilidad"):
+            where_clauses.append(f"H.ability_name = '{filtros['habilidad']}'")
 
         where_str = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
         sql = f"""
-            SELECT P.id_pokedex, P.name
+            SELECT DISTINCT P.id_pokedex, P.name
             FROM PokeEspecie P
             LEFT JOIN EsTipo E ON P.id_pokedex = E.id_pokemon
+            LEFT JOIN HabilidadesPosibles H ON P.id_pokedex = H.id_pokemon
             {where_str} 
             ORDER BY {"P.id_pokedex" if order_by == 'id' else "P.name"} {direction} 
             LIMIT 25 OFFSET {offset}
@@ -41,16 +44,22 @@ class Catalogo:
         where_clauses = []
         if filtros.get("nombre"):
             where_clauses.append(f"P.name LIKE '%{filtros['nombre']}%'")
-
         if filtros.get("tipo"):
             where_clauses.append(f"(E.type1 = '{filtros['tipo']}' OR E.type2 = '{filtros['tipo']}')")
+        if filtros.get("habilidad"):
+            where_clauses.append(f"H.ability_name = '{filtros['habilidad']}'")
+
+        # Si hay filtros de tablas relacionadas (Tipo o Habilidad), usamos JOINs
+        if filtros.get("tipo") or filtros.get("habilidad"):
             sql = f"""
                 SELECT COUNT(DISTINCT P.id_pokedex) as total 
                 FROM PokeEspecie P
-                JOIN EsTipo E ON P.id_pokedex = E.id_pokemon
+                LEFT JOIN EsTipo E ON P.id_pokedex = E.id_pokemon
+                LEFT JOIN HabilidadesPosibles H ON P.id_pokedex = H.id_pokemon
                 {" WHERE " + " AND ".join(where_clauses) if where_clauses else ""}
             """
         else:
+            # Optimización para cuando no hay filtros complejos
             where_str = f" WHERE name LIKE '%{filtros['nombre']}%'" if filtros.get("nombre") else ""
             sql = f"SELECT COUNT(*) as total FROM PokeEspecie {where_str}"
 

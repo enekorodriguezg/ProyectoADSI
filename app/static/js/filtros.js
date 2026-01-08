@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.removeNombre = function() {
         nHidden.value = "";
         renderNombreTag();
+        document.getElementById('pokemonFilterForm').submit();
     };
 
     // --- 3. GESTIÓN DE TAGS MÚLTIPLES (TIPO Y HABILIDAD) ---
