@@ -115,7 +115,6 @@
                     <td class="id-col">{{ "%04d" | format(p.id) }}</td>
                     <td class="img-col"><img src="{{ p.imagen }}" class="img-pokemon"></td>
                     <td class="name-col">{{ p.nombre }}</td>
-                    {# Los tipos aparecerán sin 'None' gracias a la corrección en Catalogo.py #}
                     <td class="type-col">{{ p.tipos }}</td>
                 </tr>
                 {% endfor %}

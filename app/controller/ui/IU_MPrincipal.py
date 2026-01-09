@@ -10,7 +10,8 @@ def iu_mprincipal_blueprint(db):
     def index():
         # Si ya está logueado, lo mandamos al menú
         if 'user' in session:
-             return redirect(url_for('iu_mprincipal.menu_principal'))
+            session['chatbot_mode'] = None
+            return redirect(url_for('iu_mprincipal.menu_principal'))
         # Si no, mostramos la portada bonita
         return render_template('index.html')
 

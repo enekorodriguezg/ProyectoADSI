@@ -6,118 +6,125 @@ from app.database.ResultadoSQL import ResultadoSQL
 
 class GestorBD:
     def __init__(self):
-        self.connection = sqlite3.connect(
-            Config.DB_PATH,
-            check_same_thread=False
-        )
+        self.connection = sqlite3.connect(Config.DB_PATH, check_same_thread=False)
         self.connection.row_factory = sqlite3.Row
+        # Al instanciar, nos aseguramos de que las tablas existan
+        self.crear_tablas_si_no_existen()
+
+    def crear_tablas_si_no_existen(self):
+        """Lee el archivo schema.sql y crea la estructura si alguna tabla falta"""
+        print("Verificando integridad de las tablas...")
+        try:
+            with open('app/database/schema.sql', 'r') as f:
+                schema = f.read()
+            self.connection.executescript(schema)
+            self.connection.commit()
+        except Exception as e:
+            print(f"Error al verificar/crear tablas: {e}")
 
     def cargar_toda_la_base_de_datos(self):
-        """Carga masiva de datos optimizada"""
-        print("--- INICIANDO CARGA TOTAL ---")
+        """Carga inteligente: solo descarga campos faltantes de cada Pokémon"""
+        print("--- INICIANDO ESCANEO DE REPARACIÓN (1-1025) ---")
         cursor = self.connection.cursor()
 
         try:
-            # 1. Cargar tipos y efectividades
-            self.cargar_efectividades()
+            # 1. Asegurar efectividades (Si la tabla está vacía)
+            cursor.execute("SELECT COUNT(*) as total FROM Efectivo")
+            if cursor.fetchone()['total'] == 0:
+                self.cargar_efectividades()
 
             for i in range(1, 1026):
                 try:
-                    # Comprobamos si ya existe el Pokémon
+                    # Comprobaciones individuales
                     cursor.execute("SELECT id_pokedex FROM PokeEspecie WHERE id_pokedex = ?", (i,))
-                    # Si descomentas 'continue', saltará los ya descargados para ir más rápido
-                    if cursor.fetchone():
+                    tiene_esp = cursor.fetchone()
+
+                    cursor.execute("SELECT id_pokemon FROM EsTipo WHERE id_pokemon = ?", (i,))
+                    tiene_tipo = cursor.fetchone()
+
+                    cursor.execute("SELECT id_pokemon FROM HabilidadesPosibles WHERE id_pokemon = ?", (i,))
+                    tiene_hab = cursor.fetchone()
+
+                    cursor.execute("SELECT id_evolution FROM Evoluciona WHERE id_evolution = ?", (i,))
+                    tiene_evo = cursor.fetchone()
+
+                    # Si cada campo está perfecto para este ID, saltar
+                    if tiene_esp and tiene_tipo and tiene_hab and tiene_evo:
                         continue
 
+                    # Si falta algo, descargamos de la API
+                    print(f"🛠️  Reparando datos faltantes para ID {i}...")
                     p = pb.pokemon(i)
-                    print(f"Sincronizando ID {i}: {p.name.capitalize()}...")
+                    s = pb.pokemon_species(i)
 
-                    # 3. PokeEspecie (Datos Base)
-                    stats = {s.stat.name: s.base_stat for s in p.stats}
-                    cursor.execute("""
-                        INSERT OR IGNORE INTO PokeEspecie 
-                        (id_pokedex, name, weight, ps, attack, defense, special_attack, special_defense, speed)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (p.id, p.name.capitalize(), p.weight / 10,
-                          stats.get('hp'), stats.get('attack'), stats.get('defense'),
-                          stats.get('special-attack'), stats.get('special-defense'), stats.get('speed')))
+                    # Reparar Especie/Stats
+                    if not tiene_esp:
+                        stats = {st.stat.name: st.base_stat for st in p.stats}
+                        desc = next((f.flavor_text for f in s.flavor_text_entries if f.language.name == 'en'),
+                                    "No desc.")
+                        desc = desc.replace('\n', ' ').replace('\f', ' ')
+                        cursor.execute("""
+                            INSERT OR REPLACE INTO PokeEspecie 
+                            (id_pokedex, name, description, weight, height, ps, attack, defense, special_attack, special_defense, speed)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (p.id, p.name.capitalize(), desc, p.weight / 10, p.height / 10,
+                              stats.get('hp'), stats.get('attack'), stats.get('defense'),
+                              stats.get('special-attack'), stats.get('special-defense'), stats.get('speed')))
 
-                    # 4. Tipos
-                    t1 = p.types[0].type.name.capitalize()
-                    t2 = p.types[1].type.name.capitalize() if len(p.types) > 1 else None
-                    cursor.execute("INSERT OR IGNORE INTO Tipo (name) VALUES (?)", (t1,))
-                    if t2:
-                        cursor.execute("INSERT OR IGNORE INTO Tipo (name) VALUES (?)", (t2,))
-                    cursor.execute("INSERT OR IGNORE INTO EsTipo (id_pokemon, type1, type2) VALUES (?, ?, ?)",
-                                   (p.id, t1, t2))
+                    # Reparar Tipos
+                    if not tiene_tipo:
+                        t1 = p.types[0].type.name.capitalize()
+                        t2 = p.types[1].type.name.capitalize() if len(p.types) > 1 else None
+                        cursor.execute("INSERT OR REPLACE INTO EsTipo (id_pokemon, type1, type2) VALUES (?, ?, ?)",
+                                       (p.id, t1, t2))
 
-                    # 5. Habilidades
-                    for a in p.abilities:
-                        hab_nombre = a.ability.name.capitalize()
-                        cursor.execute("SELECT name FROM Habilidad WHERE name = ?", (hab_nombre,))
-                        if not cursor.fetchone():
-                            try:
-                                res_hab = pb.ability(a.ability.name)
-                                desc = next(
-                                    (en.short_effect for en in res_hab.effect_entries if en.language.name == 'en'),
-                                    "No description.")
-                                cursor.execute("INSERT INTO Habilidad (name, description) VALUES (?, ?)",
-                                               (hab_nombre, desc))
-                            except:
-                                cursor.execute("INSERT OR IGNORE INTO Habilidad (name, description) VALUES (?, ?)",
-                                               (hab_nombre, "No description available."))
-                        cursor.execute(
-                            "INSERT OR IGNORE INTO HabilidadesPosibles (id_pokemon, ability_name) VALUES (?, ?)",
-                            (p.id, hab_nombre))
+                    # Reparar Habilidades
+                    if not tiene_hab:
+                        for a in p.abilities:
+                            h_n = a.ability.name.capitalize()
+                            cursor.execute("INSERT OR IGNORE INTO Habilidad (name, description) VALUES (?, ?)",
+                                           (h_n, "Pending..."))
+                            cursor.execute(
+                                "INSERT OR IGNORE INTO HabilidadesPosibles (id_pokemon, ability_name) VALUES (?, ?)",
+                                (p.id, h_n))
 
-                    # 6. Evoluciones
-                    try:
-                        especie = pb.pokemon_species(i)
-                        if especie.evolves_from_species:
-                            url_padre = especie.evolves_from_species.url
-                            id_padre = int(url_padre.split('/')[-2])
-                            cursor.execute("INSERT OR IGNORE INTO Evoluciona (id_base, id_evolution) VALUES (?, ?)",
-                                           (id_padre, i))
-                            print(f"   [EVO] Relación guardada: {id_padre} -> {i}")
-                    except:
-                        pass
+                    # Reparar Evolución
+                    if not tiene_evo and s.evolves_from_species:
+                        id_p = int(s.evolves_from_species.url.split('/')[-2])
+                        cursor.execute("INSERT OR REPLACE INTO Evoluciona (id_base, id_evolution) VALUES (?, ?)",
+                                       (id_p, i))
 
                     self.connection.commit()
-                    if i % 10 == 0:
-                        print(f"--- Hito: {i}/1025 alcanzado ---")
 
                 except Exception as e:
-                    print(f"Error procesando ID {i}: {e}")
+                    print(f"Error en ID {i}: {e}")
 
-            print("--- CARGA TOTAL FINALIZADA CON ÉXITO ---")
+            print("--- REPARACIÓN FINALIZADA ---")
         except Exception as e:
-            print(f"Error crítico en la carga: {e}")
+            print(f"Error crítico: {e}")
 
     def cargar_efectividades(self):
-        """Rellena la tabla Efectivo y Tipo con las relaciones de daño de la API"""
-        print("Calculando tabla de tipos y efectividades...")
+        """Carga la tabla de tipos y multiplicadores"""
+        print("Cargando tabla de efectividades...")
         cursor = self.connection.cursor()
-
-        tipos_maestros = ["Normal", "Fire", "Water", "Electric", "Grass", "Ice", "Fighting", "Poison", "Ground",
-                          "Flying", "Psychic", "Bug", "Rock", "Ghost", "Dragon", "Dark", "Steel", "Fairy"]
-
-        for t_name in tipos_maestros:
-            cursor.execute("INSERT OR IGNORE INTO Tipo (name) VALUES (?)", (t_name,))
+        tipos = ["Normal", "Fire", "Water", "Electric", "Grass", "Ice", "Fighting", "Poison", "Ground", "Flying",
+                 "Psychic", "Bug", "Rock", "Ghost", "Dragon", "Dark", "Steel", "Fairy"]
+        for t in tipos:
+            cursor.execute("INSERT OR IGNORE INTO Tipo (name) VALUES (?)", (t,))
             try:
-                res_type = pb.type_(t_name.lower())
-                rels = [(res_type.damage_relations.double_damage_to, 2.0),
-                        (res_type.damage_relations.half_damage_to, 0.5), (res_type.damage_relations.no_damage_to, 0.0)]
-                for target_list, mult in rels:
-                    for target in target_list:
-                        target_name = target.name.capitalize()
-                        cursor.execute("INSERT OR IGNORE INTO Tipo (name) VALUES (?)", (target_name,))
-                        cursor.execute(
-                            "INSERT OR IGNORE INTO Efectivo (attacker, defender, multiplier) VALUES (?, ?, ?)",
-                            (t_name, target_name, mult))
+                res = pb.type_(t.lower())
+                for target in res.damage_relations.double_damage_to:
+                    cursor.execute("INSERT OR REPLACE INTO Efectivo (attacker, defender, multiplier) VALUES (?, ?, ?)",
+                                   (t, target.name.capitalize(), 2.0))
+                for target in res.damage_relations.half_damage_to:
+                    cursor.execute("INSERT OR REPLACE INTO Efectivo (attacker, defender, multiplier) VALUES (?, ?, ?)",
+                                   (t, target.name.capitalize(), 0.5))
+                for target in res.damage_relations.no_damage_to:
+                    cursor.execute("INSERT OR REPLACE INTO Efectivo (attacker, defender, multiplier) VALUES (?, ?, ?)",
+                                   (t, target.name.capitalize(), 0.0))
             except:
                 continue
         self.connection.commit()
-        print("Tabla de tipos lista.")
 
     def execSQL(self, sql):
         cursor = self.connection.cursor()

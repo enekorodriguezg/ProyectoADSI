@@ -6,16 +6,10 @@ from config import Config
 # Rango de Pokémon a descargar (Gen 9 llega hasta 1025)
 TOTAL_POKEMON = 1025
 
-
 def conectar_bd():
     return sqlite3.connect(Config.DB_PATH)
 
-
 def cargar_tipos_y_efectividad(cursor):
-    """
-    Carga los 18 tipos elementales y llena la tabla 'Efectivo'
-    para que funcione la calculadora de compatibilidad.
-    """
     print("\n--- 1. CARGANDO TIPOS Y TABLA DE EFECTIVIDAD ---")
     tipos_base = [
         "normal", "fighting", "flying", "poison", "ground", "rock", "bug",
@@ -25,77 +19,55 @@ def cargar_tipos_y_efectividad(cursor):
 
     for tipo_nombre in tipos_base:
         try:
-            # 1. Insertar el Tipo en la tabla maestra
             t_cap = tipo_nombre.capitalize()
             cursor.execute("INSERT OR IGNORE INTO Tipo (name) VALUES (?)", (t_cap,))
 
-            # 2. Obtener datos de la API para la tabla 'Efectivo'
-            # Esto define quién pega fuerte a quién.
             api_type = pb.type_(tipo_nombre)
-
-            # Diccionario para mapear relaciones
             relaciones = {}
 
-            # Doble daño (x2.0)
             for target in api_type.damage_relations.double_damage_to:
                 relaciones[target.name] = 2.0
-
-            # Mitad de daño (x0.5)
             for target in api_type.damage_relations.half_damage_to:
                 relaciones[target.name] = 0.5
-
-            # Sin daño (x0.0)
             for target in api_type.damage_relations.no_damage_to:
                 relaciones[target.name] = 0.0
 
-            # Insertar en la tabla Efectivo
             for defensor in tipos_base:
-                multiplicador = relaciones.get(defensor, 1.0)  # Si no está en la lista, es 1.0 (neutro)
+                multiplicador = relaciones.get(defensor, 1.0)
                 defensor_cap = defensor.capitalize()
-
                 cursor.execute("""
                     INSERT OR REPLACE INTO Efectivo (attacker, defender, multiplier)
                     VALUES (?, ?, ?)
                 """, (t_cap, defensor_cap, multiplicador))
 
-            print(f"   > Tipo {t_cap} y sus efectividades cargados.")
-
+            print(f"   > Tipo {t_cap} cargado.")
         except Exception as e:
-            print(f"   ❌ Error con el tipo {tipo_nombre}: {e}")
-
+            print(f"   ❌ Error tipo {tipo_nombre}: {e}")
 
 def cargar_pokemons(conn, cursor):
-    """
-    Carga los datos de los Pokémon uno a uno.
-    """
-    print(f"\n--- 2. CARGANDO {TOTAL_POKEMON} POKÉMON (ESTO TOMARÁ TIEMPO) ---")
-
+    print(f"\n--- 2. CARGANDO {TOTAL_POKEMON} POKÉMON (MODO SOBREESCRITURA TOTAL) ---")
     start_time = time.time()
 
     for i in range(1, TOTAL_POKEMON + 1):
         try:
-            # --- PETICIONES A LA API ---
-            # Usamos la API para obtener datos básicos y especie (descripción)
+            # 1. Llamadas a la API
             p = pb.pokemon(i)
             s = pb.pokemon_species(i)
 
-            # --- PREPARAR DATOS ---
             p_id = p.id
             nombre = p.name.capitalize()
-            peso = p.weight / 10.0  # API devuelve hectogramos -> pasamos a Kg
-            altura = p.height / 10.0  # API devuelve decímetros -> pasamos a Metros
-
-            # Stats (diccionario rápido)
+            peso = p.weight / 10.0
+            altura = p.height / 10.0
             stats = {stat.stat.name: stat.base_stat for stat in p.stats}
 
-            # Descripción en inglés (buscamos la primera disponible)
+            # Descripción
             desc = "No description available."
             for entry in s.flavor_text_entries:
                 if entry.language.name == "en":
                     desc = entry.flavor_text.replace('\n', ' ').replace('\f', ' ')
                     break
 
-            # --- INSERTAR EN PokeEspecie ---
+            # 2. INSERTAR/REEMPLAZAR EN PokeEspecie
             cursor.execute("""
                 INSERT OR REPLACE INTO PokeEspecie 
                 (id_pokedex, name, description, weight, height, ps, attack, defense, special_attack, special_defense, speed)
@@ -106,60 +78,51 @@ def cargar_pokemons(conn, cursor):
                 stats.get('special-attack', 0), stats.get('special-defense', 0), stats.get('speed', 0)
             ))
 
-            # --- INSERTAR TIPOS (Tabla EsTipo) ---
-            tipos_encontrados = []
-            for t in p.types:
-                t_name = t.type.name.capitalize()
-                tipos_encontrados.append(t_name)
-
+            # 3. INSERTAR/REEMPLAZAR TIPOS
+            tipos_encontrados = [t.type.name.capitalize() for t in p.types]
             type1 = tipos_encontrados[0]
             type2 = tipos_encontrados[1] if len(tipos_encontrados) > 1 else None
-
             cursor.execute("INSERT OR REPLACE INTO EsTipo (id_pokemon, type1, type2) VALUES (?, ?, ?)",
                            (p_id, type1, type2))
 
-            # --- INSERTAR HABILIDADES (Tabla Habilidad y HabilidadesPosibles) ---
+            # 4. INSERTAR HABILIDADES
             for ab in p.abilities:
                 ab_name = ab.ability.name.capitalize()
-                # 1. Asegurar que la habilidad existe en la tabla maestra
                 cursor.execute("INSERT OR IGNORE INTO Habilidad (name, description) VALUES (?, ?)",
                                (ab_name, "Descripción pendiente"))
-                # 2. Relacionar con el Pokémon
                 cursor.execute("INSERT OR IGNORE INTO HabilidadesPosibles (id_pokemon, ability_name) VALUES (?, ?)",
                                (p_id, ab_name))
 
-            # Feedback visual simple
-            print(f"✅ [{i}/{TOTAL_POKEMON}] {nombre}")
+            # 5. INSERTAR/REEMPLAZAR EVOLUCIONES (LO QUE FALTABA)
+            if s.evolves_from_species:
+                id_padre = int(s.evolves_from_species.url.split('/')[-2])
+                cursor.execute("""
+                    INSERT OR REPLACE INTO Evoluciona (id_base, id_evolution) 
+                    VALUES (?, ?)
+                """, (id_padre, p_id))
+                evo_msg = f" | EVO: {id_padre} -> {p_id}"
+            else:
+                evo_msg = ""
 
-            # Guardar cambios cada 10 Pokémon para seguridad
+            print(f"✅ [{i}/{TOTAL_POKEMON}] {nombre}{evo_msg}")
+
             if i % 10 == 0:
                 conn.commit()
 
         except Exception as e:
-            print(f"❌ Error cargando ID {i}: {e}")
-            # Si falla uno, seguimos con el siguiente, no paramos todo.
+            print(f"❌ Error ID {i}: {e}")
             continue
 
-    # Commit final
     conn.commit()
-    elapsed = time.time() - start_time
-    print(f"\n--- CARGA COMPLETADA EN {elapsed / 60:.2f} MINUTOS ---")
-
+    print(f"\n--- CARGA COMPLETADA EN {(time.time() - start_time) / 60:.2f} MINUTOS ---")
 
 def main():
-    print(f"--- CONECTANDO A: {Config.DB_PATH} ---")
     conn = conectar_bd()
     cursor = conn.cursor()
-
-    # 1. Primero cargamos la estructura de tipos (rápido)
     cargar_tipos_y_efectividad(cursor)
     conn.commit()
-
-    # 2. Luego cargamos los bichos (lento)
     cargar_pokemons(conn, cursor)
-
     conn.close()
-
 
 if __name__ == "__main__":
     main()
