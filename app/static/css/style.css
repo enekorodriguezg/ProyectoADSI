@@ -167,7 +167,7 @@ td.type-col { font-style: italic; }
     outline: none;
 }
 
-/* --- 5. TAGS DE FILTRO --- */
+/* --- 5. TAGS DE FILTRO Y TIPOS --- */
 .tag-container {
     display: flex;
     flex-wrap: wrap;
@@ -241,20 +241,21 @@ td.type-col { font-style: italic; }
     font-weight: bold;
 }
 
-/* --- 7. VISTA DE DETALLE --- */
+/* --- 7. VISTA DE DETALLE (ESTRUCTURA MEJORADA) --- */
 .detail-card-modern {
     display: flex;
+    flex-wrap: wrap; /* Para que la evolución baje al final */
     background: white;
     border-radius: 20px;
     padding: 30px;
-    gap: 40px;
+    gap: 30px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     margin-bottom: 40px;
     align-items: flex-start;
 }
 
 .detail-visual {
-    flex: 0 0 300px;
+    flex: 0 0 220px; /* Reducido para imagen más pequeña */
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -263,24 +264,25 @@ td.type-col { font-style: italic; }
 .image-container-inner {
     background: #f9f9f9;
     border-radius: 15px;
-    padding: 20px;
+    padding: 15px;
     text-align: center;
 }
 
 .image-container-inner img {
     width: 100%;
-    max-width: 250px;
+    max-width: 180px; /* IMAGEN ALGO MÁS PEQUEÑA */
     height: auto;
 }
 
 .detail-data {
     flex: 1;
+    min-width: 300px;
 }
 
 .description-box {
     margin-bottom: 20px;
     padding: 15px;
-    background: #f1f2f6;
+    background: #f1f2f6; /* GRIS ORIGINAL */
     border-radius: 12px;
     font-style: italic;
     color: #555;
@@ -350,43 +352,54 @@ td.type-col { font-style: italic; }
 .bar-fill.spd { background: #78C850; }
 .bar-fill.spe { background: #F85888; }
 
-/* --- 9. LÍNEA EVOLUTIVA --- */
-.evo-flex-modern {
+/* --- 9. LÍNEA EVOLUTIVA (SOLUCIÓN DEFINITIVA) --- */
+.evolution-footer {
+    width: 100%;
+    border-top: 1px solid #eee;
+    padding-top: 25px;
+    margin-top: 10px;
+    order: 10;
+}
+
+.evo-tree-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 15px;
-    flex-wrap: wrap;
-    margin-top: 20px;
 }
 
 .evo-branches-container {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: column; /* Apila las ramas de la Etapa 2 verticalmente */
+    gap: 20px;
 }
 
 .evo-branch-path {
     display: flex;
-    align-items: center;
+    align-items: center; /* Mantiene Flecha -> E2 -> Flecha -> (Columna E3) en línea */
     gap: 15px;
 }
 
-.evo-stage {
+.evo-column {
     display: flex;
     flex-direction: column;
+    gap: 15px;
     align-items: center;
+    justify-content: center;
 }
 
 .evo-box-modern {
     text-align: center;
     background: #fdfdfd;
-    padding: 10px 8px;
+    padding: 10px;
     border-radius: 15px;
     border: 1px solid #eee;
     cursor: pointer;
     min-width: 110px;
     transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .evo-box-modern:hover {
@@ -396,13 +409,12 @@ td.type-col { font-style: italic; }
 
 .evo-box-modern.active {
     background: #fff5f5;
-    border-color: #ee1515;
+    border: 2px solid #ee1515;
 }
 
 .evo-box-modern img {
     width: 60px;
     height: 60px;
-    display: block;
     margin: 0 auto;
 }
 
@@ -425,6 +437,7 @@ td.type-col { font-style: italic; }
     color: #ee1515;
     font-size: 20px;
     font-weight: bold;
+    user-select: none;
 }
 
 /* --- 10. MENÚ PRINCIPAL --- */
@@ -498,8 +511,6 @@ td.type-col { font-style: italic; }
 }
 
 /* --- 11. LOGIN Y REGISTRO --- */
-
-/* Contenedor que centra todo en la pantalla */
 .login-wrapper {
     min-height: 80vh;
     width: 100%;
@@ -519,11 +530,7 @@ td.type-col { font-style: italic; }
     border: 1px solid #eee;
     text-align: center;
     position: relative;
-    margin-top: -20px; /* Para solapar ligeramente con el banner */
-}
-
-.login-header {
-    margin-bottom: 30px;
+    margin-top: -20px;
 }
 
 .login-header h2 {
@@ -562,7 +569,6 @@ td.type-col { font-style: italic; }
     outline: none;
     box-sizing: border-box;
     transition: border-color 0.3s;
-    font-family: 'Segoe UI', sans-serif;
 }
 
 .form-control:focus {
@@ -582,21 +588,9 @@ td.type-col { font-style: italic; }
     transition: background 0.2s;
 }
 
-.btn-apply:hover {
-    background: #cc0000;
-}
-
-.login-footer {
-    margin-top: 25px;
-    border-top: 1px solid #eee;
-    padding-top: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+.btn-apply:hover { background: #cc0000; }
 
 /* --- 12. PÁGINA DE INICIO (LANDING PAGE) --- */
-
 .landing-wrapper {
     height: 100vh;
     width: 100%;
@@ -618,10 +612,6 @@ td.type-col { font-style: italic; }
     transition: transform 0.3s;
 }
 
-.landing-card:hover {
-    transform: translateY(-5px);
-}
-
 .landing-logo {
     font-size: 42px;
     font-weight: 900;
@@ -630,13 +620,6 @@ td.type-col { font-style: italic; }
     margin-bottom: 15px;
     text-shadow: 2px 2px 0px #333;
     text-transform: uppercase;
-}
-
-.landing-text {
-    color: #666;
-    margin-bottom: 40px;
-    line-height: 1.6;
-    font-size: 16px;
 }
 
 .landing-buttons {
@@ -662,63 +645,17 @@ td.type-col { font-style: italic; }
     text-align: center;
 }
 
-.btn-big:active {
-    transform: scale(0.98);
-    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
-}
+.btn-primary { background-color: #ee1515; color: white; }
+.btn-secondary { background-color: #3B4CCA; color: white; }
 
-/* Botones específicos */
-.btn-primary {
-    background-color: #ee1515;
-    color: white;
-}
-.btn-primary:hover {
-    background-color: #cc0000;
-}
-
-.btn-secondary {
-    background-color: #3B4CCA;
-    color: white;
-}
-.btn-secondary:hover {
-    background-color: #2a3999;
-}
-
-.landing-footer {
-    margin-top: 40px;
-    font-size: 12px;
-    color: #aaa;
-    border-top: 1px solid #eee;
-    padding-top: 20px;
-}
-
-/* Estilo base para todos los mensajes */
+/* --- MENSAJES FLASH --- */
 .flash-message {
     padding: 15px;
     margin-bottom: 20px;
-    border-radius: 8px; /* Bordes redondeados */
+    border-radius: 8px;
     text-align: center;
     font-weight: bold;
-    border: 1px solid transparent;
 }
 
-/* Estilo ESPECÍFICO para éxito (Verde) */
-.flash-message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
-}
-
-/* Estilo ESPECÍFICO para error (Rojo) */
-.flash-message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
-}
-
-/* Estilo para mensajes de Información (Azul) */
-.flash-message.info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border-color: #bee5eb;
-}
+.flash-message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.flash-message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }

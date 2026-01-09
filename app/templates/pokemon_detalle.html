@@ -23,12 +23,15 @@
         <div class="detail-card-modern">
             <div class="detail-visual">
                 <div class="image-container-inner">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{{ p.id }}.png" alt="{{ p.name }}">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{{ p.id }}.png"
+                         alt="{{ p.name }}" class="main-pokemon-img">
                 </div>
             </div>
 
             <div class="detail-data">
-                {% if p.description %}<div class="description-box">{{ p.description }}</div>{% endif %}
+                {% if p.description %}
+                    <div class="description-box">{{ p.description }}</div>
+                {% endif %}
 
                 <div class="data-section">
                     <h3>Información General</h3>
@@ -43,7 +46,6 @@
                 <div class="data-section">
                     <h3>Estadísticas Base</h3>
                     <div class="stats-container">
-                        {# Accedemos a p.stats (el diccionario dentro del objeto) #}
                         {% set stats_map = [
                             ('PS', p.stats.ps, 'hp'),
                             ('Ataque', p.stats.attack, 'atk'),
@@ -65,58 +67,59 @@
                 </div>
 
                 {% if p.evolution %}
-                <div class="data-section">
+                <div class="data-section evolution-footer">
                     <h3>Línea Evolutiva</h3>
-                    <div class="evo-flex-modern">
-                        {# Etapa 1 #}
-                        <div class="evo-stage">
+                    <div class="evo-tree-wrapper">
+                        {# ETAPA 1: Columna única inicial #}
+                        <div class="evo-column">
                             {% for evo in p.evolution.e1 %}
                                 <div class="evo-box-modern {{ 'active' if evo.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ evo.id }}'">
                                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ evo.id }}.png" alt="{{ evo.name }}">
                                     <span>{{ evo.name }}</span>
                                     <div class="evo-types">
-                                        {% for t in evo.types %}
-                                            <div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>
-                                        {% endfor %}
+                                        {% for t in evo.types %}<div class="tag tag-{{ t.lower() }}">{{ t }}</div>{% endfor %}
                                     </div>
                                 </div>
                             {% endfor %}
                         </div>
 
-                        {# Etapa 2 y sucesivas #}
+                        {# FLECHA Y RAMAS #}
                         {% if p.evolution.e2 %}
-                        <div class="evo-arrow">➜</div>
-                        <div class="evo-branches-container">
-                            {% for e2_pk in p.evolution.e2 %}
-                                <div class="evo-branch-path">
-                                    <div class="evo-box-modern {{ 'active' if e2_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e2_pk.id }}'">
-                                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e2_pk.id }}.png" alt="{{ e2_pk.name }}">
-                                        <span>{{ e2_pk.name }}</span>
-                                        <div class="evo-types">
-                                            {% for t in e2_pk.types %}
-                                                <div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
+                            <div class="evo-arrow">➜</div>
 
-                                    {# Etapa 3 vinculada a su padre de la Etapa 2 #}
-                                    {% for e3_pk in p.evolution.e3 %}
-                                        {% if e3_pk.id_padre == e2_pk.id %}
+                            <div class="evo-branches-container">
+                                {% for e2_pk in p.evolution.e2 %}
+                                    <div class="evo-branch-path">
+                                        {# Caja Etapa 2 #}
+                                        <div class="evo-box-modern {{ 'active' if e2_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e2_pk.id }}'">
+                                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e2_pk.id }}.png" alt="{{ e2_pk.name }}">
+                                            <span>{{ e2_pk.name }}</span>
+                                            <div class="evo-types">
+                                                {% for t in e2_pk.types %}<div class="tag tag-{{ t.lower() }}">{{ t }}</div>{% endfor %}
+                                            </div>
+                                        </div>
+
+                                        {# AQUÍ VA EL BLOQUE QUE PREGUNTAS (ETAPA 3) #}
+                                        {# Filtramos los hijos de este e2_pk #}
+                                        {% set hijos_e3 = p.evolution.e3 | selectattr("id_padre", "equalto", e2_pk.id) | list %}
+
+                                        {% if hijos_e3 %}
                                             <div class="evo-arrow">➜</div>
-                                            <div class="evo-box-modern {{ 'active' if e3_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e3_pk.id }}'">
-                                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e3_pk.id }}.png" alt="{{ e3_pk.name }}">
-                                                <span>{{ e3_pk.name }}</span>
-                                                <div class="evo-types">
-                                                    {% for t in e3_pk.types %}
-                                                        <div class="tag tag-{{ t.lower() }}" style="font-size: 8px; padding: 1px 5px;">{{ t }}</div>
-                                                    {% endfor %}
-                                                </div>
+                                            <div class="evo-column">
+                                                {% for e3_pk in hijos_e3 %}
+                                                    <div class="evo-box-modern {{ 'active' if e3_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e3_pk.id }}'">
+                                                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e3_pk.id }}.png" alt="{{ e3_pk.name }}">
+                                                        <span>{{ e3_pk.name }}</span>
+                                                        <div class="evo-types">
+                                                            {% for t in e3_pk.types %}<div class="tag tag-{{ t.lower() }}">{{ t }}</div>{% endfor %}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
                                             </div>
                                         {% endif %}
-                                    {% endfor %}
-                                </div>
-                            {% endfor %}
-                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         {% endif %}
                     </div>
                 </div>
