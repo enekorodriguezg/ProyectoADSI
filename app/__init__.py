@@ -41,7 +41,7 @@ def create_app():
     else:
         print("Base de datos verificada al 100%. Iniciando web...")
 
-    # Registrar Blueprints...
+    # Registrar Blueprints
     app.register_blueprint(iu_mprincipal_blueprint(db))
     app.register_blueprint(iu_lpokemon_blueprint(db))
     app.register_blueprint(iu_chatbot_blueprint(db))
