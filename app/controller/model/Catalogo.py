@@ -100,13 +100,14 @@ class Catalogo:
 
     def getCadenaEvolutivaSQL(self, id_pokemon):
         id_raiz = id_pokemon
+        encontrado = False
         # Buscar el origen de la cadena (el primer pokémon)
-        while True:
+        while not encontrado:
             res_p = self.db.execSQL(f"SELECT id_base FROM Evoluciona WHERE id_evolution = {id_raiz}")
             if res_p.next():
                 id_raiz = res_p.getInt("id_base")
             else:
-                break
+                encontrado = True
 
         def get_pk_data(id_pk):
             res = self.db.execSQL(f"SELECT name FROM PokeEspecie WHERE id_pokedex = {id_pk}")

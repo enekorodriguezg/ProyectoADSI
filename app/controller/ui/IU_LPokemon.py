@@ -75,13 +75,13 @@ def iu_lpokemon_blueprint(db):
     def mostrarDetalle(id_pokemon):
         catalogo = Catalogo(db)
         # Paso 2: obtenerDetallePokemon(ID)
-        data_json = catalogo.obtenerDetallePokemon(id_pokemon)
+        pokemon_detalles = catalogo.obtenerDetallePokemon(id_pokemon)
 
-        if not data_json:
+        if not pokemon_detalles:
             return "Pokémon no encontrado", 404
 
         return_url = session.get('last_pokedex_url', '/lpokemon')
 
-        return render_template('pokemon_detalle.html', p=data_json, return_url=return_url)
+        return render_template('pokemon_detalle.html', p=pokemon_detalles, return_url=return_url)
 
     return bp
