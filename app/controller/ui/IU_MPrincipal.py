@@ -116,4 +116,66 @@ def iu_mprincipal_blueprint(db):
         session.clear()
         return redirect(url_for('iu_mprincipal.index'))
 
+    # --- RUTA 6: PERFIL / MODIFICAR DATOS ---
+    @bp.route('/profile', methods=['GET', 'POST'])
+    def profile():
+        # Seguridad: Si no está logueado, fuera
+        if 'user' not in session:
+            return redirect(url_for('iu_mprincipal.login'))
+
+        usuario_actual = session['user']
+        gestor = GestorBD()
+
+        if request.method == 'POST':
+            # 1. Recoger datos nuevos del formulario
+            nombre = request.form['name']
+            apellido = request.form['surname']
+            dni = request.form['dni']
+            email = request.form['email']
+            nueva_clave = request.form['password']  # Puede venir vacía
+
+            try:
+                # 2. Construir la SQL de actualización
+                # Si escribió contraseña nueva, actualizamos todo.
+                if nueva_clave:
+                    sql = f"""
+                        UPDATE Users 
+                        SET name='{nombre}', surname='{apellido}', dni='{dni}', email='{email}', password='{nueva_clave}'
+                        WHERE username='{usuario_actual}'
+                    """
+                else:
+                    # Si NO escribió contraseña, actualizamos todo MENOS la contraseña
+                    sql = f"""
+                        UPDATE Users 
+                        SET name='{nombre}', surname='{apellido}', dni='{dni}', email='{email}'
+                        WHERE username='{usuario_actual}'
+                    """
+
+                gestor.connection.execute(sql)
+                gestor.connection.commit()
+
+                flash('¡Datos actualizados correctamente!', 'success')  # Verde
+                return redirect(url_for('iu_mprincipal.menu_principal'))
+
+            except Exception as e:
+                flash(f'Error al actualizar: {e}', 'error')  # Rojo
+                return redirect(url_for('iu_mprincipal.profile'))
+
+        # --- Lógica GET (Cargar datos) ---
+        # Buscamos los datos actuales para rellenar el formulario
+        sql = f"SELECT * FROM Users WHERE username = '{usuario_actual}'"
+        res = gestor.execSQL(sql)
+
+        datos_usuario = {}
+        if res.next():
+            datos_usuario = {
+                'name': res.getString('name'),
+                'surname': res.getString('surname'),
+                'dni': res.getString('dni'),
+                'email': res.getString('email')
+                # La contraseña no la enviamos por seguridad
+            }
+
+        return render_template('profile.html', datos=datos_usuario)
     return bp
+

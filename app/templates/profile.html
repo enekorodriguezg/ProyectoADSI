@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar Perfil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Mis Datos</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('iu_mprincipal.profile') }}" method="POST">
+
+            <div class="form-group">
+                <label>Usuario (No modificable)</label>
+                <input type="text" value="{{ session['user'] }}" readonly style="background-color: #eee; cursor: not-allowed;">
+            </div>
+
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" name="name" value="{{ datos.name }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Apellido</label>
+                <input type="text" name="surname" value="{{ datos.surname }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>DNI</label>
+                <input type="text" name="dni" value="{{ datos.dni }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" value="{{ datos.email }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nueva Contraseña</label>
+                <input type="password" name="password" placeholder="Déjalo vacío para mantener la actual">
+                <small style="color: #666; font-size: 12px;">Solo escribe aquí si quieres cambiarla.</small>
+            </div>
+
+            <button type="submit" class="btn-primary">Guardar Cambios</button>
+
+            <a href="{{ url_for('iu_mprincipal.menu_principal') }}" class="btn-secondary" style="display:block; text-align:center; margin-top:10px; text-decoration:none;">Cancelar</a>
+        </form>
+    </div>
+
+</body>
+</html>
