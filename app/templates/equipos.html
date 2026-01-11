@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Equipos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="header">
+            <a href="/" style="text-decoration: none; color: inherit;"><div class="titulo">Pokédex</div></a>
+            <div class="titulo" style="font-size: 1.2rem; color: #ee1515;">Mis Equipos</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="detail-card-modern" style="align-items: center; padding: 20px;">
+            <form action="{{ url_for('iu_equipos.crear_equipo') }}" method="POST" style="display:flex; gap:10px; width:100%; justify-content:center;">
+                <input type="text" name="nombre_equipo" placeholder="Nombre del nuevo equipo..." class="form-control" style="width: 300px;" required>
+                <button type="submit" class="btn-primary" style="padding: 10px 20px; border-radius: 12px; border: none; cursor:pointer;">Crear Equipo</button>
+            </form>
+        </div>
+
+        <div class="menu-grid">
+            {% for eq in equipos %}
+            <div class="menu-nav-card" style="padding: 20px; text-align: center;">
+                <h2 style="margin: 0 0 15px 0;">{{ eq.name }}</h2>
+
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="{{ url_for('iu_equipos.ver_equipo', id_team=eq.id) }}" class="btn-page">Ver</a>
+                    <a href="{{ url_for('iu_equipos.editar_equipo', id_team=eq.id) }}" class="btn-page" style="background:#3B4CCA; color:white;">Editar</a>
+                    <a href="{{ url_for('iu_equipos.eliminar_equipo', id_team=eq.id) }}" class="btn-page" style="background:#ee1515; color:white;" onclick="return confirm('¿Seguro que quieres borrar este equipo?');">Borrar</a>
+                </div>
+            </div>
+            {% else %}
+            <p style="text-align:center; width:100%; color:#888;">No tienes equipos creados todavía.</p>
+            {% endfor %}
+        </div>
+
+        <div style="text-align:center; margin-top:30px;">
+            <a href="{{ url_for('iu_mprincipal.menu_principal') }}" class="btn-secondary" style="padding:10px 20px; border-radius:10px; text-decoration:none;">Volver al Menú</a>
+        </div>
+    </div>
+</body>
+</html>

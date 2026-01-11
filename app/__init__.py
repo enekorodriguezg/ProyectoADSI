@@ -6,6 +6,7 @@ from app.controller.ui.IU_LPokemon import iu_lpokemon_blueprint
 from app.controller.ui.IU_Chatbot import iu_chatbot_blueprint
 from app.controller.ui.IU_CompatibilidadTipos import iu_compatibilidad_blueprint
 from app.controller.ui.IU_CadenaEvolutiva import iu_cadena_evolutiva_blueprint
+from app.controller.ui.IU_Equipos import iu_equipos_blueprint
 from app.database.GestorBD import GestorBD
 from config import Config
 
@@ -47,5 +48,6 @@ def create_app():
     app.register_blueprint(iu_chatbot_blueprint(db))
     app.register_blueprint(iu_compatibilidad_blueprint(db))
     app.register_blueprint(iu_cadena_evolutiva_blueprint(db))
+    app.register_blueprint(iu_equipos_blueprint(db))
 
     return app

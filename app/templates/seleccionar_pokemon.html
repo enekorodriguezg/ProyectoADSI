@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Seleccionar Pokémon</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="header">
+            <div class="titulo">Elige un Pokémon</div>
+            <a href="javascript:history.back()" class="btn-filter-trigger" style="text-decoration:none;">Cancelar</a>
+        </div>
+
+        <table class="lista-table">
+            <thead>
+                <tr>
+                    <th class="img-col">FOTO</th>
+                    <th class="name-col">NOMBRE</th>
+                    <th style="text-align:center;">ACCIÓN</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pokemons %}
+                <tr>
+                    <td class="img-col"><img src="{{ p.imagen }}" class="img-pokemon"></td>
+                    <td class="name-col">{{ p.nombre }}</td>
+                    <td style="text-align:center;">
+                        <a href="{{ url_for('iu_equipos.add_pk_action', id_pokedex=p.id) }}"
+                           class="btn-primary" style="text-decoration:none; padding:5px 15px; border-radius:5px; font-size:0.9rem;">
+                           Añadir
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if pagina > 1 %}
+            <a href="{{ url_for('iu_equipos.seleccionar_add', page=pagina-1) }}" class="btn-page">Anterior</a>
+            {% endif %}
+
+            <span class="btn-page active">{{ pagina }}</span>
+
+            {% if pagina < total_p %}
+            <a href="{{ url_for('iu_equipos.seleccionar_add', page=pagina+1) }}" class="btn-page">Siguiente</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar {{ equipo.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="header">
+            <div class="titulo">Editando: {{ equipo.name }}</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div style="margin-bottom: 20px; text-align: center;">
+            <h3 style="color:#666;">Miembros del equipo ({{ equipo.pokemonList|length }}/6)</h3>
+
+            {% if equipo.pokemonList|length < 6 %}
+            <a href="{{ url_for('iu_equipos.seleccionar_add') }}" class="btn-primary" style="text-decoration:none; padding:10px 20px; border-radius:10px;">+ AÑADIR POKÉMON</a>
+            {% endif %}
+        </div>
+
+        <div class="menu-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+            {% for pk in equipo.pokemonList %}
+            <div class="menu-nav-card" style="padding: 15px; align-items: center; border-color: #3B4CCA;">
+                <img src="{{ pk.imagen }}" style="width: 100px; height: 100px;">
+                <h3 style="margin: 10px 0; font-size: 1rem;">{{ pk.nombre }}</h3>
+                <div class="tag-container">
+                    {% for t in pk.tipos %}
+                    <span class="tag tag-{{ t.lower() }}">{{ t }}</span>
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('iu_equipos.quitar_pokemon', id_instancia=pk.id_instancia) }}"
+                   class="btn-page" style="margin-top:10px; background:#ee1515; color:white; font-size:0.8rem;">Eliminar</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="text-align:center; margin-top:40px;">
+            <a href="{{ url_for('iu_equipos.listar_equipos') }}" class="btn-secondary" style="padding:10px 20px; border-radius:10px; text-decoration:none;">Guardar y Salir</a>
+        </div>
+    </div>
+</body>
+</html>

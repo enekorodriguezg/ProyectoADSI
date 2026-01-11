@@ -1,0 +1,115 @@
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash
+from app.controller.model.GestorEquipos import GestorEquipos
+from app.controller.model.Catalogo import Catalogo
+
+
+def iu_equipos_blueprint(db):
+    bp = Blueprint('iu_equipos', __name__)
+    gestor = GestorEquipos(db)
+    catalogo = Catalogo(db)
+
+    @bp.route('/equipos')
+    def listar_equipos():
+        if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
+
+        # USAMOS EL MÉTODO DEL DIAGRAMA: getTeams
+        equipos_objs = gestor.getTeams(session['user'])
+        # Convertimos a diccionarios para Jinja si es necesario, o pasamos objetos
+        return render_template('equipos.html', equipos=equipos_objs)
+
+    @bp.route('/equipos/crear', methods=['POST'])
+    def crear_equipo():
+        if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
+
+        nombre = request.form.get('nombre_equipo')
+        if nombre:
+            # USAMOS EL MÉTODO DEL DIAGRAMA: createTeam
+            exito = gestor.createTeam(nombre, session['user'])  # Nota: diagrama orden (name, username)
+            if exito:
+                flash("Equipo creado con éxito.", 'success')
+            else:
+                flash("Error: Nombre duplicado o fallo técnico.", 'error')
+
+        return redirect(url_for('iu_equipos.listar_equipos'))
+
+    @bp.route('/equipos/eliminar/<int:id_team>')
+    def eliminar_equipo(id_team):
+        if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
+
+        # USAMOS EL MÉTODO DEL DIAGRAMA: deleteTeam
+        if gestor.deleteTeam(id_team):
+            flash("Equipo eliminado.", 'success')
+        else:
+            flash("Error al eliminar el equipo.", 'error')
+
+        return redirect(url_for('iu_equipos.listar_equipos'))
+
+    @bp.route('/equipos/ver/<int:id_team>')
+    def ver_equipo(id_team):
+        if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
+
+        # Usamos el auxiliar para obtener detalles completos
+        equipo = gestor._rellenarDetallesEquipo(id_team)
+        if not equipo:
+            return redirect(url_for('iu_equipos.listar_equipos'))
+
+        return render_template('ver_equipo.html', equipo=equipo)
+
+    @bp.route('/equipos/editar/<int:id_team>')
+    def editar_equipo(id_team):
+        if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
+
+        equipo = gestor._rellenarDetallesEquipo(id_team)
+        session['editando_equipo_id'] = id_team
+        return render_template('editar_equipo.html', equipo=equipo)
+
+    @bp.route('/equipos/quitar_pk/<int:id_instancia>')
+    def quitar_pokemon(id_instancia):
+        if 'user' not in session or 'editando_equipo_id' not in session:
+            return redirect(url_for('iu_equipos.listar_equipos'))
+
+        id_team = session['editando_equipo_id']
+
+        # USAMOS EL MÉTODO DEL DIAGRAMA: deletePokemonFromTeam
+        if gestor.deletePokemonFromTeam(id_team, id_instancia):
+            flash("Pokémon eliminado.", 'success')
+        else:
+            flash("Error al eliminar.", 'error')
+
+        return redirect(url_for('iu_equipos.editar_equipo', id_team=id_team))
+
+    @bp.route('/equipos/seleccionar_add')
+    def seleccionar_add():
+        if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
+
+        # Reutilizamos lógica de Catálogo para mostrar la lista de selección
+        page = request.args.get('page', 1, type=int)
+        filtros = {
+            "nombre": request.args.get('nombre', '').strip(),
+            "tipo": request.args.get('tipo', '').strip(),
+            "habilidad": request.args.get('habilidad', '').strip()
+        }
+        lista = catalogo.obtenerListaPokemon(page, filtros)
+        total = catalogo.contarPokemonFiltrados(filtros)
+        total_pages = (total // 25) + (1 if total % 25 > 0 else 0)
+
+        return render_template('seleccionar_pokemon.html',
+                               pokemons=lista, pagina=page, total_p=total_pages,
+                               todos_los_tipos=[], todas_las_habilidades=[])
+
+    @bp.route('/equipos/add_pk/<int:id_pokedex>')
+    def add_pk_action(id_pokedex):
+        if 'user' not in session or 'editando_equipo_id' not in session:
+            return redirect(url_for('iu_equipos.listar_equipos'))
+
+        id_team = session['editando_equipo_id']
+
+        # USAMOS EL MÉTODO DEL DIAGRAMA: addPokemonToTeam
+        if gestor.addPokemonToTeam(id_team, id_pokedex, session['user']):
+            flash("Pokémon añadido.", 'success')
+        else:
+            flash("Error: El equipo está lleno o fallo técnico.", 'error')
+
+        return redirect(url_for('iu_equipos.editar_equipo', id_team=id_team))
+
+    return bp
