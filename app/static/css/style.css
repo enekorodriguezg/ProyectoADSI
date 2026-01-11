@@ -659,3 +659,270 @@ td.type-col { font-style: italic; }
 
 .flash-message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 .flash-message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+
+/* --- ESTILOS PERFIL DE ENTRENADOR --- */
+
+/* Contenedor principal que centra la tarjeta */
+.profile-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh; /* Ocupa casi toda la altura */
+    padding: 20px;
+}
+
+/* La tarjeta blanca */
+.profile-card {
+    background-color: white;
+    width: 100%;
+    max-width: 500px; /* Ancho máximo elegante */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* Sombra suave */
+    border-top: 5px solid #e3350d; /* Detalle rojo Pokédex arriba */
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.profile-header h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.profile-header p {
+    color: #777;
+    font-size: 14px;
+}
+
+/* Estilos de los inputs */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box; /* Importante para que no se salga */
+}
+
+.form-control:focus {
+    border-color: #e3350d; /* Rojo al escribir */
+    outline: none;
+}
+
+/* Input de solo lectura (Usuario) */
+.form-control.readonly {
+    background-color: #f8f9fa;
+    color: #666;
+    border-color: #eee;
+    cursor: default;
+}
+
+/* Contenedor de botones (para ponerlos uno al lado del otro) */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* Botones específicos del perfil */
+.btn-save {
+    flex: 2; /* El botón de guardar es más grande */
+    background-color: #e3350d;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-save:hover {
+    background-color: #c02d0b;
+}
+
+.btn-cancel {
+    flex: 1; /* El cancelar es más pequeño */
+    background-color: #e0e0e0;
+    color: #333;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+    background-color: #ccc;
+}
+
+/* --- ESTILOS DE SOLICITUDES (ADMIN) --- */
+
+.request-card {
+    background: white;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.request-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.user-info {
+    cursor: pointer;
+    flex-grow: 1; /* Para que ocupe el espacio disponible */
+}
+
+.username-text {
+    font-weight: bold;
+    font-size: 18px;
+    color: #333;
+}
+
+.click-hint {
+    font-size: 12px;
+    color: #999;
+    margin-left: 10px;
+}
+
+/* Botones circulares pequeños */
+.btn-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    margin-left: 10px;
+    color: white;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.btn-accept { background-color: #2ecc71; }
+.btn-reject { background-color: #e74c3c; }
+.btn-icon:hover { opacity: 0.8; }
+
+/* --- VENTANA MODAL (POPUP) --- */
+.modal-overlay {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5); /* Fondo oscuro semitransparente */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close-modal:hover { color: #000; }
+
+.modal-details p {
+    margin: 10px 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.modal-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-full {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* --- ESTILOS BOTÓN FAVORITO --- */
+.btn-fav {
+    display: inline-block;
+    padding: 10px 25px;
+    border-radius: 50px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid #f1c40f; /* Amarillo/Dorado */
+    color: #f39c12;
+    background-color: white;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-size: 15px;
+}
+
+.btn-fav:hover {
+    background-color: #f1c40f;
+    color: white;
+    box-shadow: 0 4px 10px rgba(241, 196, 15, 0.4);
+    transform: scale(1.05);
+}
+
+/* Estado activo (ya es favorito) */
+.btn-fav.active {
+    background-color: #f1c40f;
+    color: white;
+    border-color: #f1c40f;
+    cursor: default;
+    opacity: 1;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}

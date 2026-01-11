@@ -1,34 +1,31 @@
-from flask import Blueprint, render_template, request, session
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from app.controller.model.Catalogo import Catalogo
 
 
 def iu_lpokemon_blueprint(db):
     bp = Blueprint('lpokemon', __name__)
-    # Una sola instancia del servicio paratodo el blueprint
     catalogo = Catalogo(db)
 
     @bp.route('/lpokemon')
     def mostrarLista():
-
+        # --- (Tu código original de lista se mantiene igual) ---
         res = db.execSQL("""
-            SELECT P.name FROM Evoluciona E 
-            JOIN PokeEspecie P ON E.id_evolution = P.id_pokedex 
-            WHERE E.id_base = 1
-        """)
+                         SELECT P.name
+                         FROM Evoluciona E
+                                  JOIN PokeEspecie P ON E.id_evolution = P.id_pokedex
+                         WHERE E.id_base = 1
+                         """)
 
-        # 1. Captura de parámetros (Paginación y Orden)
         page = request.args.get('page', 1, type=int)
         order_by = request.args.get('order_by', 'id')
         direction = request.args.get('direction', 'ASC')
 
-        # 2. Captura de Filtros
         filtros = {
             "nombre": request.args.get('nombre', '').strip(),
             "tipo": request.args.get('tipo', '').strip(),
             "habilidad": request.args.get('habilidad', '').strip()
         }
 
-        # 3. Obtener datos filtrados y ordenados
         lista = catalogo.obtenerListaPokemon(
             pagina=page,
             filtros=filtros,
@@ -36,18 +33,14 @@ def iu_lpokemon_blueprint(db):
             direction=direction
         )
 
-        # 4. Lógica de Paginación Dinámica
         total_filtrados = catalogo.contarPokemonFiltrados(filtros)
         total_paginas = (total_filtrados // 25) + (1 if total_filtrados % 25 > 0 else 0)
 
-        # Ajuste de seguridad: si la página solicitada es mayor al total, ir a la última
         if page > total_paginas and total_paginas > 0:
             page = total_paginas
 
         rango_paginas = range(max(1, page - 2), min(total_paginas, page + 2) + 1)
 
-        # 5. Cargar listas para los datalists (Sugerencias en el filtro)
-        # Optimizamos la lectura de resultados
         res_tipos = db.execSQL("SELECT name FROM Tipo ORDER BY name")
         lista_tipos = []
         while res_tipos.next():
@@ -60,7 +53,6 @@ def iu_lpokemon_blueprint(db):
 
         session['last_pokedex_url'] = request.full_path
 
-        # 6. Renderizado final con todas las variables necesarias
         return render_template('lpokemon.html',
                                pokemons=lista,
                                order_by=order_by,
@@ -74,7 +66,6 @@ def iu_lpokemon_blueprint(db):
     @bp.route('/pokemon/<int:id_pokemon>')
     def mostrarDetalle(id_pokemon):
         catalogo = Catalogo(db)
-        # Paso 2: obtenerDetallePokemon(ID)
         pokemon_detalles = catalogo.obtenerDetallePokemon(id_pokemon)
 
         if not pokemon_detalles:
@@ -82,6 +73,53 @@ def iu_lpokemon_blueprint(db):
 
         return_url = session.get('last_pokedex_url', '/lpokemon')
 
-        return render_template('pokemon_detalle.html', p=pokemon_detalles, return_url=return_url)
+        # --- NUEVO: Averiguar el favorito actual del usuario ---
+        # --- NUEVO: Averiguar el favorito actual del usuario ---
+        id_fav_actual = -1
+        if 'user' in session:
+            # CORRECCIÓN: Usamos COALESCE(fav_pokemon, 0)
+            # Esto le dice a la base de datos: "Si es NULL, devuélveme un 0".
+            sql = f"SELECT COALESCE(fav_pokemon, 0) as fav_pokemon FROM Users WHERE username = '{session['user']}'"
+            res_fav = db.execSQL(sql)
+
+            if res_fav.next():
+                val = res_fav.getInt('fav_pokemon')  # Ahora 'val' será 0, nunca None
+                if val and val > 0:
+                    id_fav_actual = val
+        # -------------------------------------------------------
+        # -------------------------------------------------------
+
+        # Pasamos 'fav_id' a la plantilla
+        return render_template('pokemon_detalle.html',
+                               p=pokemon_detalles,
+                               return_url=return_url,
+                               fav_id=id_fav_actual)
+
+    # --- NUEVA RUTA: FIJAR FAVORITO ---
+    @bp.route('/set_favorite/<int:id_pokemon>')
+    def set_favorite(id_pokemon):
+        # 1. Seguridad
+        if 'user' not in session:
+            flash('Debes iniciar sesión para tener un favorito.', 'error')
+            return redirect(url_for('iu_mprincipal.login'))
+
+        usuario = session['user']
+
+        try:
+            # 2. Actualizar BD
+            sql = f"UPDATE Users SET fav_pokemon = {id_pokemon} WHERE username = '{usuario}'"
+            db.connection.execute(sql)
+            db.connection.commit()
+
+            # 3. Obtener nombre para el mensaje (estético)
+            res = db.execSQL(f"SELECT name FROM PokeEspecie WHERE id_pokedex = {id_pokemon}")
+            poke_name = res.getString('name') if res.next() else "Pokémon"
+
+            flash(f'¡{poke_name} es ahora tu Pokémon favorito!', 'success')
+        except Exception as e:
+            flash(f'Error al guardar favorito: {e}', 'error')
+
+        # 4. Volver a la ficha del Pokémon
+        return redirect(url_for('lpokemon.mostrarDetalle', id_pokemon=id_pokemon))
 
     return bp

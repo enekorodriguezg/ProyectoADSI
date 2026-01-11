@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Equipos de {{ amigo }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="background-color: #f4f4f4;">
+
+    <div class="menu-main-container">
+
+        <div class="menu-banner" style="background-color: #3498db;">
+            Equipos de {{ amigo }}
+        </div>
+
+        <div class="menu-top-links">
+            <a href="{{ url_for('iu_amigos.index') }}" class="menu-link-secondary">← Volver a Mis Amigos</a>
+        </div>
+
+        <div style="padding: 20px;">
+            {% if equipos|length == 0 %}
+                <div style="text-align: center; color: #666; margin-top: 50px;">
+                    <h3>Este entrenador no tiene equipos registrados.</h3>
+                    <p>Parece que {{ amigo }} aún no está listo para combatir.</p>
+                </div>
+            {% else %}
+                <div class="menu-grid">
+                    {% for equipo in equipos %}
+                    <div class="menu-nav-card" style="cursor: default;">
+                        <div class="dot" style="background-color: #e74c3c;"></div>
+                        <h2>{{ equipo.nombre }}</h2>
+                        <p>ID de Equipo: {{ equipo.id }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>

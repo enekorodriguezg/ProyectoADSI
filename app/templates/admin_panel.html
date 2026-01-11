@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <div class="menu-main-container">
+
+        <div class="menu-banner" style="background-color: #333;">
+            Panel de Administración
+        </div>
+
+        <div class="menu-top-links" style="display: flex; align-items: center; justify-content: space-between;">
+
+            <span style="color: #666; font-size: 0.9em;">
+                Administrador: <strong>{{ session['user'] }}</strong>
+            </span>
+
+            <a href="{{ url_for('iu_mprincipal.menu_principal') }}" class="menu-link-secondary">
+                ← Volver al Menú
+            </a>
+        </div>
+
+        <div class="menu-grid">
+
+            <a href="{{ url_for('iu_admin.requests_list') }}" class="menu-nav-card">
+                <div class="dot" style="background-color: #e67e22;"></div>
+                <h2>Solicitudes</h2>
+                <p>Aprueba o rechaza nuevos usuarios pendientes (PENDANT).</p>
+            </a>
+
+            <a href="{{ url_for('iu_admin.users_list') }}" class="menu-nav-card">
+                <div class="dot" style="background-color: #3498db;"></div>
+                <h2>Gestionar Usuarios</h2>
+                <p>Edita contraseñas, roles o elimina cuentas existentes.</p>
+            </a>
+
+            <a href="#" class="menu-nav-card" style="opacity: 0.6;">
+                <div class="dot" style="background-color: #95a5a6;"></div>
+                <h2>Estadísticas</h2>
+                <p>(Próximamente) Ver datos de uso de la Pokédex.</p>
+            </a>
+
+        </div>
+    </div>
+
+</body>
+</html>

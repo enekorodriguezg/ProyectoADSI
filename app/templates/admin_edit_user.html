@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="background-color: #f4f4f4;">
+
+    <div style="padding: 20px;">
+        <a href="{{ url_for('iu_admin.users_list') }}" style="text-decoration: none; color: #666;">
+            ← Volver a la lista
+        </a>
+    </div>
+
+    <div class="profile-wrapper">
+        <div class="profile-card" style="border-top: 5px solid #f1c40f;">
+
+            <div class="profile-header">
+                <h2>Editando Usuario</h2>
+                <p>Estás modificando los datos de: <strong>{{ usuario.username }}</strong></p>
+            </div>
+
+            <form action="{{ url_for('iu_admin.edit_user', username=usuario.username) }}" method="POST">
+
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" name="name" class="form-control" value="{{ usuario.name }}" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Apellido</label>
+                        <input type="text" name="surname" class="form-control" value="{{ usuario.surname }}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">DNI</label>
+                    <input type="text" name="dni" class="form-control" value="{{ usuario.dni }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ usuario.email }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Contraseña (Opcional)</label>
+                    <input type="password" name="password" class="form-control" placeholder="Escribe para cambiarla">
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('iu_admin.users_list') }}" class="btn-cancel">Cancelar</a>
+                    <button type="submit" class="btn-save" style="background-color: #f1c40f; color: #333;">Guardar Cambios</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</body>
+</html>

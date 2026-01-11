@@ -13,7 +13,14 @@
         <div class="menu-banner">Pokédex</div>
 
         <div class="menu-top-links" style="display: flex; align-items: center; gap: 15px;">
-            <a href="#" class="menu-link-secondary">Modificar Datos</a>
+
+            {% if session['role'] == 'ADMIN' %}
+                <a href="{{ url_for('iu_admin.panel') }}" class="menu-link-secondary" style="font-weight: bold; color: #c0392b;">
+                    ⚙️ Panel Admin
+                </>
+                <span style="color: #ccc;">|</span>
+            {% endif %}
+            <a href="{{ url_for('iu_mprincipal.profile') }}" class="menu-link-secondary">Modificar Datos</a>
             <a href="#" class="menu-link-secondary">ChangeLog</a>
 
             <span style="color: #ccc;">|</span>
@@ -47,7 +54,7 @@
                 <p>Resuelve tus dudas con el asistente inteligente.</p>
             </a>
 
-            <a href="#" class="menu-nav-card">
+            <a href="{{ url_for('iu_amigos.index') }}" class="menu-nav-card">
                 <div class="dot"></div>
                 <h2>Amigos</h2>
                 <p>Gestiona tu lista de contactos y entrenadores.</p>

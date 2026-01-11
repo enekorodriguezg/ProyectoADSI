@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>{{ p.name }} - Detalle</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="main-wrapper">
@@ -11,6 +12,15 @@
             <a href="/" class="btn-pokedex-logo">Pokédex</a>
         </div>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div style="max-width: 1000px; margin: 10px auto; padding: 0 20px;">
+                {% for category, message in messages %}
+                  <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
         <div class="header">
             <div class="titulo">
                 {{ p.name }} <span class="detail-number">#{{ "%03d" | format(p.id) }}</span>
@@ -21,12 +31,27 @@
         </div>
 
         <div class="detail-card-modern">
+
             <div class="detail-visual">
                 <div class="image-container-inner">
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{{ p.id }}.png"
                          alt="{{ p.name }}" class="main-pokemon-img">
                 </div>
-            </div>
+
+                {% if session['user'] %}
+                    <div style="margin-top: 20px; text-align: center;">
+                        {% if fav_id == p.id %}
+                            <button class="btn-fav active" disabled>
+                                <i class="fa-solid fa-star"></i> Es tu favorito
+                            </button>
+                        {% else %}
+                            <a href="{{ url_for('lpokemon.set_favorite', id_pokemon=p.id) }}" class="btn-fav">
+                                <i class="fa-regular fa-star"></i> Elegir como Pokémon favorito
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                </div>
 
             <div class="detail-data">
                 {% if p.description %}
@@ -70,7 +95,7 @@
                 <div class="data-section evolution-footer">
                     <h3>Línea Evolutiva</h3>
                     <div class="evo-tree-wrapper">
-                        {# ETAPA 1: Columna única inicial #}
+                        {# ETAPA 1 #}
                         <div class="evo-column">
                             {% for evo in p.evolution.e1 %}
                                 <div class="evo-box-modern {{ 'active' if evo.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ evo.id }}'">
@@ -99,8 +124,7 @@
                                             </div>
                                         </div>
 
-                                        {# AQUÍ VA EL BLOQUE QUE PREGUNTAS (ETAPA 3) #}
-                                        {# Filtramos los hijos de este e2_pk #}
+                                        {# ETAPA 3 #}
                                         {% set hijos_e3 = p.evolution.e3 | selectattr("id_padre", "equalto", e2_pk.id) | list %}
 
                                         {% if hijos_e3 %}

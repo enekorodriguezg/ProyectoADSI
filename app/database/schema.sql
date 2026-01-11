@@ -44,11 +44,13 @@ CREATE TABLE IF NOT EXISTS Users (
 );
 
 CREATE TABLE IF NOT EXISTS Amigo (
-    follower VARCHAR(50),
-    followed VARCHAR(50),
-    PRIMARY KEY (follower, followed),
-    FOREIGN KEY (follower) REFERENCES Users(username),
-    FOREIGN KEY (followed) REFERENCES Users(username)
+    user_sender VARCHAR(50),    -- El que envía la solicitud
+    user_receiver VARCHAR(50),  -- El que la recibe
+    status INTEGER DEFAULT 0,   -- 0: Pendiente, 1: Aceptada
+    request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_sender, user_receiver),
+    FOREIGN KEY (user_sender) REFERENCES Users(username),
+    FOREIGN KEY (user_receiver) REFERENCES Users(username)
 );
 
 CREATE TABLE IF NOT EXISTS Mensaje (

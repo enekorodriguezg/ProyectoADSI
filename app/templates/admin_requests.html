@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitudes Pendientes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #f4f4f4;">
+
+    <div class="menu-main-container">
+
+        <div class="menu-banner" style="background-color: #e67e22;">
+            Solicitudes de Acceso
+        </div>
+
+        <div class="menu-top-links">
+            <a href="{{ url_for('iu_admin.panel') }}" class="menu-link-secondary">← Volver al Panel</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}" style="margin: 20px;">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+
+            {% if usuarios|length == 0 %}
+                <div style="text-align: center; color: #888; margin-top: 50px;">
+                    <h3>¡Todo limpio!</h3>
+                    <p>No hay solicitudes pendientes en este momento.</p>
+                </div>
+            {% else %}
+
+                {% for u in usuarios %}
+                <div class="request-card">
+                    <div class="user-info" onclick="openModal('modal-{{ u.username }}')">
+                        <span class="username-text">{{ u.username }}</span>
+                        <span class="click-hint">(Ver detalles)</span>
+                    </div>
+
+                    <div class="action-buttons">
+                        <a href="{{ url_for('iu_admin.approve_user', username=u.username) }}" class="btn-icon btn-accept" title="Aprobar">
+                            <i class="fa-solid fa-check"></i>
+                        </a>
+                        <a href="{{ url_for('iu_admin.reject_user', username=u.username) }}" class="btn-icon btn-reject" title="Rechazar" onclick="return confirm('¿Seguro que quieres borrar esta solicitud?');">
+                            <i class="fa-solid fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="modal-{{ u.username }}" class="modal-overlay">
+                    <div class="modal-content">
+                        <span class="close-modal" onclick="closeModal('modal-{{ u.username }}')">&times;</span>
+
+                        <h3>Detalles de Solicitud</h3>
+                        <div class="modal-details">
+                            <p><strong>Usuario:</strong> {{ u.username }}</p>
+                            <p><strong>Nombre:</strong> {{ u.name }}</p>
+                            <p><strong>Apellido:</strong> {{ u.surname }}</p>
+                            <p><strong>DNI:</strong> {{ u.dni }}</p>
+                            <p><strong>Email:</strong> {{ u.email }}</p>
+                        </div>
+
+                        <div class="modal-actions">
+                            <a href="{{ url_for('iu_admin.approve_user', username=u.username) }}" class="btn-full btn-accept">
+                                APROBAR SOLICITUD
+                            </a>
+                            <a href="{{ url_for('iu_admin.reject_user', username=u.username) }}" class="btn-full btn-reject" onclick="return confirm('¿Seguro?');">
+                                RECHAZAR
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Cerrar si se hace clic fuera de la cajita blanca
+        window.onclick = function(event) {
+            if (event.target.className === 'modal-overlay') {
+                event.target.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>

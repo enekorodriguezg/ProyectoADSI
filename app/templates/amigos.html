@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Amigos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab-btn { padding: 10px 20px; background: none; border: none; font-size: 16px; font-weight: bold; color: #666; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #3498db; border-bottom-color: #3498db; }
+        .tab-content { display: none; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .badge { background: #e74c3c; color: white; padding: 2px 6px; border-radius: 10px; font-size: 12px; vertical-align: top; }
+
+        /* Estilo para tarjeta de amigo clicable */
+        .friend-card { cursor: pointer; transition: transform 0.2s; }
+        .friend-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        /* Modal Overlay */
+        .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background-color: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 400px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
+        .close-modal { position: absolute; top: 10px; right: 20px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
+    </style>
+</head>
+<body style="background-color: #f4f4f4;">
+
+    <div class="menu-main-container">
+        <div class="menu-banner" style="background-color: #8e44ad;">Social</div>
+
+        <div class="menu-top-links">
+            <a href="{{ url_for('iu_mprincipal.menu_principal') }}" class="menu-link-secondary">← Volver</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('tab-amigos')">Mis Amigos</button>
+            <button class="tab-btn" onclick="openTab('tab-solicitudes')">
+                Solicitudes
+                {% if solicitudes|length > 0 %} <span class="badge">{{ solicitudes|length }}</span> {% endif %}
+            </button>
+            <button class="tab-btn" onclick="openTab('tab-buscar')">Buscar Entrenadores</button>
+        </div>
+
+        <div id="tab-amigos" class="tab-content active">
+            {% if amigos|length == 0 %}
+                <p style="text-align: center; color: #888; padding: 20px;">Aún no tienes amigos. ¡Ve a la pestaña Buscar!</p>
+            {% else %}
+                <div class="menu-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+                    {% for amigo in amigos %}
+
+                    <div class="menu-nav-card friend-card" onclick="openModal('modal-{{ amigo.username }}')" style="text-align: center; padding: 20px;">
+                        <div style="font-size: 40px; margin-bottom: 10px;">👤</div>
+                        <h3>{{ amigo.username }}</h3>
+                        <p style="font-size: 12px; color: #888;">(Ver detalles)</p>
+                    </div>
+
+                    <div id="modal-{{ amigo.username }}" class="modal-overlay">
+                        <div class="modal-content">
+                            <span class="close-modal" onclick="closeModal(event, 'modal-{{ amigo.username }}')">&times;</span>
+
+                            <h2 style="color: #8e44ad; margin-bottom: 5px;">{{ amigo.username }}</h2>
+                            <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
+
+                            <p style="font-size: 16px; margin-bottom: 20px;">
+                                <strong>Pokémon Favorito:</strong><br>
+                                {% if amigo.fav_poke %}
+                                    <span style="color: #e67e22; font-weight: bold;">{{ amigo.fav_poke }}</span>
+                                {% else %}
+                                    <span style="color: #999;">No especificado</span>
+                                {% endif %}
+                            </p>
+
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <a href="{{ url_for('iu_amigos.ver_equipos_amigo', username=amigo.username) }}" class="btn-primary" style="background-color: #3498db; text-decoration: none; padding: 10px; border-radius: 5px; color: white;">
+                                    <i class="fa-solid fa-users"></i> Ver Equipos Pokémon
+                                </a>
+
+                                <a href="{{ url_for('iu_amigos.delete_friend', friend=amigo.username) }}" onclick="return confirm('¿Borrar a {{ amigo.username }}?')" class="btn-secondary" style="background-color: #e74c3c; color: white; text-decoration: none; padding: 10px; border-radius: 5px;">
+                                    <i class="fa-solid fa-user-minus"></i> Eliminar Amigo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div id="tab-solicitudes" class="tab-content">
+            {% if solicitudes|length == 0 %}
+                <p style="text-align: center; color: #888; padding: 20px;">No tienes solicitudes pendientes.</p>
+            {% else %}
+                {% for soli in solicitudes %}
+                <div class="request-card">
+                    <div class="user-info"><span class="username-text">{{ soli.username }}</span></div>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('iu_amigos.accept_request', sender=soli.username) }}" class="btn-icon btn-accept"><i class="fa-solid fa-check"></i></a>
+                        <a href="{{ url_for('iu_amigos.reject_request', sender=soli.username) }}" class="btn-icon btn-reject"><i class="fa-solid fa-times"></i></a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div id="tab-buscar" class="tab-content">
+            <form action="{{ url_for('iu_amigos.index') }}" method="GET" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" name="q" class="form-control" placeholder="Nombre de usuario..." value="{{ query if query else '' }}">
+                <input type="hidden" name="tab" value="search">
+                <button type="submit" class="btn-primary">Buscar</button>
+            </form>
+
+            {% if busqueda %}
+                {% for b in busqueda %}
+                <div class="request-card">
+                    <span class="username-text">{{ b.username }}</span>
+                    {% if b.estado_relacion == 'NADA' %}
+                        <a href="{{ url_for('iu_amigos.send_request', target=b.username, last_query=query) }}" class="btn-secondary" style="padding: 5px 15px; font-size: 14px;"><i class="fa-solid fa-user-plus"></i> Añadir</a>
+                    {% elif b.estado_relacion == 'PENDIENTE' %}
+                        <span style="color: #e67e22; font-size: 14px;">Solicitud enviada</span>
+                    {% else %}
+                        <span style="color: #2ecc71; font-weight: bold; font-size: 14px;">¡Ya sois amigos!</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+
+        function closeModal(e, id) {
+            e.stopPropagation(); // Evita que el clic se propague
+            document.getElementById(id).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.className === 'modal-overlay') event.target.style.display = "none";
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('q')) { document.querySelector("button[onclick=\"openTab('tab-buscar')\"]").click(); }
+    </script>
+</body>
+</html>

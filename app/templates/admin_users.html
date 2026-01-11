@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #f4f4f4;">
+
+    <div class="menu-main-container">
+
+        <div class="menu-banner" style="background-color: #3498db;">
+            Gestión de Usuarios
+        </div>
+
+        <div class="menu-top-links">
+            <a href="{{ url_for('iu_admin.panel') }}" class="menu-link-secondary">← Volver al Panel</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}" style="margin: 20px;">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+
+            <form action="{{ url_for('iu_admin.users_list') }}" method="GET" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <input type="text" name="q" class="form-control" placeholder="Buscar usuario..." value="{{ search_query if search_query else '' }}">
+                <button type="submit" class="btn-primary" style="padding: 10px 20px;">Buscar</button>
+                {% if search_query %}
+                    <a href="{{ url_for('iu_admin.users_list') }}" class="btn-secondary" style="padding: 10px; text-decoration: none; align-self: center;">Borrar filtro</a>
+                {% endif %}
+            </form>
+
+            {% if usuarios|length == 0 %}
+                <div style="text-align: center; color: #888;">
+                    <h3>No se encontraron usuarios.</h3>
+                </div>
+            {% else %}
+                {% for u in usuarios %}
+
+                <div class="request-card">
+                    <div class="user-info" onclick="openModal('modal-{{ u.username }}')">
+                        <span class="username-text">{{ u.username }}</span>
+                        <span class="click-hint">(Ver detalles)</span>
+                    </div>
+                    <a href="{{ url_for('iu_admin.edit_user', username=u.username) }}" style="color: #666;">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+                </div>
+
+                <div id="modal-{{ u.username }}" class="modal-overlay">
+                    <div class="modal-content">
+                        <span class="close-modal" onclick="closeModal('modal-{{ u.username }}')">&times;</span>
+
+                        <h3 style="border-bottom: 2px solid #3498db; padding-bottom: 10px;">{{ u.username }}</h3>
+
+                        <div class="modal-details">
+                            <p><strong>Nombre:</strong> {{ u.name }}</p>
+                            <p><strong>Apellido:</strong> {{ u.surname }}</p>
+                            <p><strong>Email:</strong> {{ u.email }}</p>
+                            <p><strong>DNI:</strong> {{ u.dni }}</p>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+
+                            <a href="{{ url_for('iu_admin.edit_user', username=u.username) }}" class="btn-full" style="background-color: #f1c40f; color: #333;">
+                                <i class="fa-solid fa-pen"></i> Modificar Datos
+                            </a>
+
+                            <a href="{{ url_for('iu_admin.make_admin', username=u.username) }}" class="btn-full" style="background-color: #333;" onclick="return confirm('¿Seguro que quieres hacer ADMIN a este usuario? Tendrá acceso total.');">
+                                <i class="fa-solid fa-crown"></i> Convertir en Administrador
+                            </a>
+
+                            <a href="{{ url_for('iu_admin.delete_user', username=u.username) }}" class="btn-full" style="background-color: #e74c3c;" onclick="return confirm('¡CUIDADO! Esto borrará al usuario permanentemente. ¿Continuar?');">
+                                <i class="fa-solid fa-trash"></i> Eliminar Cuenta
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = function(event) { if (event.target.className === 'modal-overlay') event.target.style.display = "none"; }
+    </script>
+</body>
+</html>
