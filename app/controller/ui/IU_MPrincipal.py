@@ -8,7 +8,24 @@ def iu_mprincipal_blueprint(db):
 
     @bp.route('/')
     def index():
-        return redirect(url_for('iu_mprincipal.menu_principal'))
+
+
+        # Si ya está logueado, lo mandamos al menú
+
+
+        if 'user' in session:
+
+
+            session['chatbot_mode'] = None
+
+
+            return redirect(url_for('iu_mprincipal.menu_principal'))
+
+
+        # Si no, mostramos la portada bonita
+
+
+        return render_template('index.html')
 
     @bp.route('/login', methods=['GET', 'POST'])
     def login():
