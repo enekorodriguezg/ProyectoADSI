@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil de Entrenador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #f4f4f4;">
+
+    <div class="menu-main-container">
+
+        <div class="menu-banner" style="background-color: #e74c3c;">
+            Tarjeta de Entrenador
+        </div>
+
+        <div class="menu-top-links">
+            <a href="{{ url_for('iu_mprincipal.menu_principal') }}" class="menu-link-secondary">← Volver al Menú</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}" style="margin: 20px;">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div style="display: flex; gap: 20px; max-width: 900px; margin: 20px auto; flex-wrap: wrap;">
+
+            <div class="profile-card" style="flex: 1; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); min-width: 300px;">
+
+                <h2 style="color: #333; border-bottom: 2px solid #e74c3c; padding-bottom: 10px; margin-bottom: 20px;">
+                    {{ user.username }}
+                </h2>
+
+                <div style="margin-bottom: 25px;">
+                    <p><strong>Nombre Real:</strong> {{ user.name }} {{ user.surname }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>DNI:</strong> {{ user.dni }}</p>
+                </div>
+
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #eee;">
+                    <h3 style="margin: 0 0 10px 0; color: #555;">Compañero Pokémon</h3>
+
+                    {% if user.fav_poke_id %}
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{{ user.fav_poke_id }}.png"
+                             alt="{{ user.fav_poke_name }}"
+                             style="width: 150px; height: 150px; object-fit: contain;">
+                        <p style="font-weight: bold; font-size: 1.2em; color: #e74c3c;">{{ user.fav_poke_name }}</p>
+                    {% else %}
+                        <p style="color: #999; font-style: italic;">No has seleccionado un compañero aún.</p>
+                        <a href="{{ url_for('lpokemon.mostrarLista') }}" style="color: #3498db; text-decoration: none;">Ir a la Pokédex</a>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div style="width: 300px; display: flex; flex-direction: column; gap: 15px;">
+
+                <a href="{{ url_for('iu_equipos.listar_equipos') }}" class="menu-nav-card" style="text-align: center; padding: 20px; display: block; text-decoration: none;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">⚔️</div>
+                    <h3 style="margin: 0;">Mis Equipos</h3>
+                    <p style="font-size: 14px; color: #777;">Gestiona tus formaciones de combate.</p>
+                </a>
+
+                <a href="{{ url_for('iu_mprincipal.edit_profile') }}" class="menu-nav-card" style="text-align: center; padding: 20px; display: block; text-decoration: none; border-left: 5px solid #f1c40f;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">✏️</div>
+                    <h3 style="margin: 0;">Editar Datos</h3>
+                    <p style="font-size: 14px; color: #777;">Cambiar contraseña, email o nombre.</p>
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
