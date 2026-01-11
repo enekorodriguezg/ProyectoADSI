@@ -39,8 +39,8 @@ def iu_mprincipal_blueprint(db):
 
         return render_template('login.html')
 
-    @bp.route('/register', methods=['GET', 'POST'])
-    def register():
+    @bp.route('/registro', methods=['GET', 'POST'])
+    def registro():
         if request.method == 'POST':
             username = request.form['username']
             password = request.form['password']
