@@ -72,6 +72,8 @@ def iu_lpokemon_blueprint(db):
             return "Pokémon no encontrado", 404
 
         return_url = session.get('last_pokedex_url', '/lpokemon')
+        if session.get('chatbot_mode') == 'hab_est':
+             return_url = url_for('chatbot.index')
 
         # --- NUEVO: Averiguar el favorito actual del usuario ---
         # --- NUEVO: Averiguar el favorito actual del usuario ---

@@ -135,6 +135,7 @@ class GestorEquipos:
 
             equipo.pokemonList.append({
                 "id_instancia": res_miembros.getInt("id"),
+                "id_pokedex": res_miembros.getInt("id_pokedex"),
                 "nombre": res_miembros.getString("name"),
                 "tipos": tipos,
                 "imagen": f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{res_miembros.getInt('id_pokedex')}.png"

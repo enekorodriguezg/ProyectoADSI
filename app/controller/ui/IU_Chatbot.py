@@ -17,4 +17,9 @@ def iu_chatbot_blueprint(db):
         session['chatbot_mode'] = 'consulta_evo'
         return redirect(url_for('lpokemon.mostrarLista'))
 
+    @bp.route('/chatbot/ver_habilidades_estadisticas')
+    def ver_habilidades_estadisticas():
+        session['chatbot_mode'] = 'hab_est'
+        return redirect(url_for('iu_equipos.listar_equipos'))
+
     return bp

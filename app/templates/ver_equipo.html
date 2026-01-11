@@ -1,27 +1,39 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ equipo.name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
     <div class="main-wrapper">
         <div class="header">
             <div class="titulo">Equipo: {{ equipo.name }}</div>
-            <a href="{{ url_for('iu_equipos.listar_equipos') }}" class="btn-filter-trigger" style="text-decoration:none;">Volver</a>
+            <a href="{{ url_for('iu_equipos.listar_equipos') }}" class="btn-filter-trigger"
+                style="text-decoration:none;">Volver</a>
         </div>
 
         <div class="menu-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
             {% for pk in equipo.pokemonList %}
-            <div class="menu-nav-card" style="padding: 15px; align-items: center;">
-                <img src="{{ pk.imagen }}" style="width: 100px; height: 100px;">
-                <h3 style="margin: 10px 0; font-size: 1rem;">{{ pk.nombre }}</h3>
-                <div class="tag-container">
-                    {% for t in pk.tipos %}
-                    <span class="tag tag-{{ t.lower() }}">{{ t }}</span>
-                    {% endfor %}
-                </div>
+            <div class="menu-nav-card" style="padding: 15px; align-items: center; cursor: pointer;">
+                {% if session.get('chatbot_mode') == 'hab_est' %}
+                <a href="{{ url_for('lpokemon.mostrarDetalle', id_pokemon=pk.id_pokedex) }}"
+                    style="text-decoration: none; color: inherit; display: contents;">
+                    {% endif %}
+
+                    <img src="{{ pk.imagen }}" style="width: 100px; height: 100px;">
+                    <h3 style="margin: 10px 0; font-size: 1rem;">{{ pk.nombre }}</h3>
+                    <div class="tag-container">
+                        {% for t in pk.tipos %}
+                        <span class="tag tag-{{ t.lower() }}">{{ t }}</span>
+                        {% endfor %}
+                    </div>
+
+                    {% if session.get('chatbot_mode') == 'hab_est' %}
+                </a>
+                {% endif %}
             </div>
             {% else %}
             <p>Este equipo está vacío.</p>
@@ -29,4 +41,5 @@
         </div>
     </div>
 </body>
+
 </html>
