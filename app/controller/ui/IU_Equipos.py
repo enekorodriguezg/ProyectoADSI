@@ -15,6 +15,8 @@ def iu_equipos_blueprint(db):
         # USAMOS EL MÉTODO DEL DIAGRAMA: getTeams
         equipos_objs = gestor.getTeams(session['user'])
         # Convertimos a diccionarios para Jinja si es necesario, o pasamos objetos
+        if session.get('chatbot_mode') == 'eval_mejor':
+            return render_template('equipos_estadisticas.html', equipos=equipos_objs)
         return render_template('equipos.html', equipos=equipos_objs)
 
     @bp.route('/equipos/crear', methods=['POST'])
@@ -111,5 +113,42 @@ def iu_equipos_blueprint(db):
             flash("Error: El equipo está lleno o fallo técnico.", 'error')
 
         return redirect(url_for('iu_equipos.editar_equipo', id_team=id_team))
+
+    @bp.route('/equipos/evaluar')
+    def evaluar_equipo():
+        if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
+
+        id_team = request.args.get('id_team')
+        stat_name = request.args.get('stat')
+
+        if not id_team or not stat_name:
+            flash("Faltan parámetros", "error")
+            return redirect(url_for('iu_equipos.listar_equipos'))
+
+        # Usamos métodos internos de Gestor para no duplicar lógica
+        # Esto podría refactorizarse a un método público getTeamDetailsWithStats
+        equipo = gestor._rellenarDetallesEquipo(id_team)
+
+        if not equipo or not equipo.pokemonList:
+            flash("El equipo no existe o está vacío.", "error")
+            return redirect(url_for('iu_equipos.listar_equipos'))
+
+        # Lógica para encontrar el mejor
+        best_pk = None
+        max_val = -1
+
+        for pk in equipo.pokemonList:
+            # stats es un dict agregado en GestorEquipos
+            val = pk['stats'].get(stat_name, 0)
+            if val > max_val:
+                max_val = val
+                best_pk = pk
+
+        if best_pk:
+            # Redirigir a detalle
+            return redirect(url_for('lpokemon.mostrarDetalle', id_pokemon=best_pk['id_pokedex']))
+
+        flash("No se pudo evaluar.", "error")
+        return redirect(url_for('iu_equipos.listar_equipos'))
 
     return bp

@@ -117,8 +117,11 @@ class GestorEquipos:
         equipo = EquipoPokemon(res_eq.getInt("id_team"), res_eq.getString("name"))
 
         # Recuperar pokémon
+        # Agregamos ps, attack, etc. de la tabla Pokémon (instancia)
         sql_miembros = f"""
-            SELECT P_Inst.id, P_Esp.id_pokedex, P_Esp.name, E1.type1, E1.type2
+            SELECT P_Inst.id, P_Esp.id_pokedex, P_Esp.name, E1.type1, E1.type2,
+                   P_Inst.ps, P_Inst.attack, P_Inst.defense, P_Inst.special_attack, 
+                   P_Inst.special_defense, P_Inst.speed
             FROM PokémonParticipa PP
             JOIN Pokémon P_Inst ON PP.id_pokemon = P_Inst.id
             JOIN PokeEspecie P_Esp ON P_Inst.id_pokedex = P_Esp.id_pokedex
@@ -138,7 +141,15 @@ class GestorEquipos:
                 "id_pokedex": res_miembros.getInt("id_pokedex"),
                 "nombre": res_miembros.getString("name"),
                 "tipos": tipos,
-                "imagen": f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{res_miembros.getInt('id_pokedex')}.png"
+                "imagen": f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{res_miembros.getInt('id_pokedex')}.png",
+                "stats": {
+                    "ps": res_miembros.getInt("ps"),
+                    "attack": res_miembros.getInt("attack"),
+                    "defense": res_miembros.getInt("defense"),
+                    "special_attack": res_miembros.getInt("special_attack"),
+                    "special_defense": res_miembros.getInt("special_defense"),
+                    "speed": res_miembros.getInt("speed")
+                }
             })
 
         return equipo

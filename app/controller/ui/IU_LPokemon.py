@@ -74,6 +74,8 @@ def iu_lpokemon_blueprint(db):
         return_url = session.get('last_pokedex_url', '/lpokemon')
         if session.get('chatbot_mode') == 'hab_est':
              return_url = url_for('chatbot.index')
+        elif session.get('chatbot_mode') == 'eval_mejor':
+             return_url = url_for('iu_equipos.listar_equipos')
 
         # --- NUEVO: Averiguar el favorito actual del usuario ---
         # --- NUEVO: Averiguar el favorito actual del usuario ---

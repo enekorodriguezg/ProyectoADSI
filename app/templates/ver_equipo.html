@@ -17,28 +17,32 @@
 
         <div class="menu-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
             {% for pk in equipo.pokemonList %}
-            <div class="menu-nav-card" style="padding: 15px; align-items: center; cursor: pointer;">
+            <div class="menu-nav-card" style="padding: 15px; align-items: center; cursor: pointer; position: relative;">
                 {% if session.get('chatbot_mode') == 'hab_est' %}
                 <a href="{{ url_for('lpokemon.mostrarDetalle', id_pokemon=pk.id_pokedex) }}"
-                    style="text-decoration: none; color: inherit; display: contents;">
-                    {% endif %}
+                    style="display: block; text-decoration: none; color: inherit; width: 100%; height: 100%;">
+                    {% else %}
+                    <div style="width: 100%; height: 100%;">
+                        {% endif %}
 
-                    <img src="{{ pk.imagen }}" style="width: 100px; height: 100px;">
-                    <h3 style="margin: 10px 0; font-size: 1rem;">{{ pk.nombre }}</h3>
-                    <div class="tag-container">
-                        {% for t in pk.tipos %}
-                        <span class="tag tag-{{ t.lower() }}">{{ t }}</span>
-                        {% endfor %}
-                    </div>
+                        <img src="{{ pk.imagen }}" style="width: 100px; height: 100px; margin: 0 auto; display: block;">
+                        <h3 style="margin: 10px 0; font-size: 1rem; text-align: center;">{{ pk.nombre }}</h3>
+                        <div class="tag-container" style="display: flex; justify-content: center; gap: 5px;">
+                            {% for t in pk.tipos %}
+                            <span class="tag tag-{{ t.lower() }}">{{ t }}</span>
+                            {% endfor %}
+                        </div>
 
-                    {% if session.get('chatbot_mode') == 'hab_est' %}
+                        {% if session.get('chatbot_mode') == 'hab_est' %}
                 </a>
-                {% endif %}
+                {% else %}
             </div>
-            {% else %}
-            <p>Este equipo está vacío.</p>
-            {% endfor %}
+            {% endif %}
         </div>
+        {% else %}
+        <p>Este equipo está vacío.</p>
+        {% endfor %}
+    </div>
     </div>
 </body>
 

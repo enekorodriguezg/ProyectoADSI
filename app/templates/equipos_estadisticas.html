@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Equipos - Estadísticas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .layout-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .left-column {
+            flex: 1;
+        }
+
+        .right-column {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            align-self: flex-start;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-wrapper">
+        <div class="header">
+            <a href="/" style="text-decoration: none; color: inherit;">
+                <div class="titulo">Pokédex</div>
+            </a>
+            <div class="titulo" style="font-size: 1.2rem; color: #ee1515;">Mis Equipos</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="layout-container">
+            <!-- Columna Izquierda: Contenido Original -->
+            <div class="left-column">
+
+
+                <div class="menu-grid">
+                    {% for eq in equipos %}
+                    <div class="menu-nav-card" style="padding: 20px; text-align: center;">
+                        <h2 style="margin: 0 0 15px 0;">{{ eq.name }}</h2>
+
+                        <div style="margin-top: 15px;">
+                            <label class="selection-box"
+                                style="display: block; padding: 10px; background: #f0f0f0; border-radius: 8px; cursor: pointer;">
+                                <input type="checkbox" name="selected_teams" value="{{ eq.id }}"
+                                    style="margin-right: 8px;" onclick="selectTeamOnly(this)">
+                                Seleccionar
+                            </label>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="text-align:center; width:100%; color:#888;">No tienes equipos creados todavía.</p>
+                    {% endfor %}
+                </div>
+
+                <div style="text-align:center; margin-top:30px;">
+                    <a href="{{ url_for('chatbot.index') }}" class="btn-secondary"
+                        style="padding:10px 20px; border-radius:10px; text-decoration:none;">Chatbot</a>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Tab de Estadísticas -->
+            <div class="right-column">
+                <h3 style="margin-top: 0; color: #333;">Estadísticas</h3>
+                <div id="stats-list-container" style="display: flex; flex-direction: column; gap: 10px;">
+                    <label class="stat-checkbox-container"
+                        style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="stat_select" value="ps" onclick="selectStatOnly(this)">
+                        <span>PS</span>
+                    </label>
+                    <label class="stat-checkbox-container"
+                        style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="stat_select" value="attack" onclick="selectStatOnly(this)">
+                        <span>Ataque</span>
+                    </label>
+                    <label class="stat-checkbox-container"
+                        style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="stat_select" value="defense" onclick="selectStatOnly(this)">
+                        <span>Defensa</span>
+                    </label>
+                    <label class="stat-checkbox-container"
+                        style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="stat_select" value="special_attack" onclick="selectStatOnly(this)">
+                        <span>Atq. Esp</span>
+                    </label>
+                    <label class="stat-checkbox-container"
+                        style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="stat_select" value="special_defense"
+                            onclick="selectStatOnly(this)">
+                        <span>Def. Esp</span>
+                    </label>
+                    <label class="stat-checkbox-container"
+                        style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="stat_select" value="speed" onclick="selectStatOnly(this)">
+                        <span>Velocidad</span>
+                    </label>
+
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button onclick="evaluarMejor()" class="btn-primary"
+                            style="padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer; width: 100%;">
+                            Evaluar
+                        </button>
+                    </div>
+                </div>
+
+                <script>
+                    function selectTeamOnly(checkbox) {
+                        const checkboxes = document.getElementsByName('selected_teams');
+                        checkboxes.forEach((item) => {
+                            if (item !== checkbox) item.checked = false;
+                        });
+                    }
+
+                    function selectStatOnly(checkbox) {
+                        const checkboxes = document.getElementsByName('stat_select');
+                        checkboxes.forEach((item) => {
+                            if (item !== checkbox) item.checked = false;
+                        });
+                    }
+
+                    function evaluarMejor() {
+                        // 1. Get selected team
+                        const teamCheckboxes = document.getElementsByName('selected_teams');
+                        let selectedTeamId = null;
+                        for (const cb of teamCheckboxes) {
+                            if (cb.checked) {
+                                selectedTeamId = cb.value;
+                                break;
+                            }
+                        }
+
+                        if (!selectedTeamId) {
+                            alert("Por favor, selecciona un equipo de la izquierda.");
+                            return;
+                        }
+
+                        // 2. Get selected stat
+                        const statCheckboxes = document.getElementsByName('stat_select');
+                        let selectedStat = null;
+                        for (const cb of statCheckboxes) {
+                            if (cb.checked) {
+                                selectedStat = cb.value;
+                                break;
+                            }
+                        }
+
+                        if (!selectedStat) {
+                            alert("Por favor, selecciona una estadística.");
+                            return;
+                        }
+
+                        // 3. Redirect
+                        window.location.href = `/equipos/evaluar?id_team=${selectedTeamId}&stat=${selectedStat}`;
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

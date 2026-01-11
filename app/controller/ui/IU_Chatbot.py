@@ -22,4 +22,9 @@ def iu_chatbot_blueprint(db):
         session['chatbot_mode'] = 'hab_est'
         return redirect(url_for('iu_equipos.listar_equipos'))
 
+    @bp.route('/chatbot/evaluar_mejor_pokemon')
+    def evaluar_mejor_pokemon():
+        session['chatbot_mode'] = 'eval_mejor'
+        return redirect(url_for('iu_equipos.listar_equipos'))
+
     return bp

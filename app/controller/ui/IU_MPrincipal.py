@@ -84,6 +84,10 @@ def iu_mprincipal_blueprint(db):
     def menu_principal():
         if 'user' not in session:
             return redirect(url_for('iu_mprincipal.login'))
+        
+        # RESETEAMOS modo chatbot para navegación limpia
+        session['chatbot_mode'] = None
+        
         return render_template('mprincipal.html')
 
     @bp.route('/logout')
