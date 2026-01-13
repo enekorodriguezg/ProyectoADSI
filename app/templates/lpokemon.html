@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Pokédex</title>
+    <title>Pokédex - Lista</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
@@ -19,65 +19,92 @@
     "&direction=" ~ (direction if direction else 'ASC') %}
 
     <div class="main-wrapper">
-        <div class="header">
-            {# TÍTULO QUE VUELVE AL INICIO (ROOT) #}
+        <div class="header" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; margin-bottom: 30px;">
+
+            {# 1. ZONA IZQUIERDA: TÍTULO #}
             <a href="/" style="text-decoration: none; color: inherit;">
-                <div class="titulo">Pokédex</div>
+                <div class="titulo" style="margin: 0; font-size: 2.5em;">Pokédex</div>
             </a>
 
-            <div class="filter-container">
-                <button type="button" class="btn-filter-trigger" id="toggleFilters">
-                    Filtrar
-                </button>
+            {# 2. ZONA DERECHA: USUARIO + FILTRAR (En columna) #}
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 15px;">
 
-                <div class="filter-panel" id="filterContent">
-                    <form action="/lpokemon" method="GET" id="pokemonFilterForm">
-                        <div class="filter-field">
-                            <label>Name</label>
-                            {# Buscará por apariciones (ej: 'saur' -> Bulbasaur) #}
-                            <input type="text" id="nombreInput" placeholder="Press Enter...">
-                            <div id="nombreTags" class="tag-container"></div>
-                            <input type="hidden" name="nombre" id="nombreHidden"
-                                value="{{ request.args.get('nombre', '') }}">
-                        </div>
+                {# BLOQUE SUPERIOR: BOTONES DE USUARIO (Sin recuadro) #}
+                <div class="menu-top-links" style="display: flex; align-items: center; gap: 12px; font-size: 0.95em;">
+                    {% if session['role'] == 'ADMIN' %}
+                        <a href="{{ url_for('iu_admin.panel') }}" class="menu-link-secondary" style="font-weight: bold; color: #c0392b; text-decoration: none;">
+                            ⚙️ Admin
+                        </a>
+                        <span style="color: #ccc;">|</span>
+                    {% endif %}
 
-                        <div class="filter-field">
-                            <label>Types</label>
-                            <input list="lista-tipos" id="tipoInput" placeholder="Select type...">
-                            <datalist id="lista-tipos">
-                                {% for t in todos_los_tipos %}
-                                <option value="{{ t }}">
+                    <a href="{{ url_for('iu_mprincipal.profile') }}" class="menu-link-secondary" style="text-decoration: none;">Perfil</a>
+                    <span style="color: #ccc;">|</span>
+
+                    <span style="color: #444;">
+                        <strong>{{ session['user'] }}</strong>
+                        {% if session['role'] == 'ADMIN' %}<small>(ADMIN)</small>{% endif %}
+                    </span>
+
+                    <a href="{{ url_for('iu_mprincipal.logout') }}" class="menu-link-secondary" style="color: #e74c3c; text-decoration: none; font-weight: bold; margin-left: 5px;">
+                        Salir
+                    </a>
+                </div>
+
+                {# BLOQUE INFERIOR: BOTÓN FILTRAR #}
+                <div class="filter-container">
+                    <button type="button" class="btn-filter-trigger" id="toggleFilters" style="width: auto; min-width: 120px;">
+                        Filtrar
+                    </button>
+
+                    <div class="filter-panel" id="filterContent" style="right: 0; left: auto;">
+                        <form action="/lpokemon" method="GET" id="pokemonFilterForm">
+                            <div class="filter-field">
+                                <label>Name</label>
+                                <input type="text" id="nombreInput" placeholder="Press Enter...">
+                                <div id="nombreTags" class="tag-container"></div>
+                                <input type="hidden" name="nombre" id="nombreHidden"
+                                    value="{{ request.args.get('nombre', '') }}">
+                            </div>
+
+                            <div class="filter-field">
+                                <label>Types</label>
+                                <input list="lista-tipos" id="tipoInput" placeholder="Select type...">
+                                <datalist id="lista-tipos">
+                                    {% for t in todos_los_tipos %}
+                                    <option value="{{ t }}">
                                     {% endfor %}
-                            </datalist>
-                            <div id="tipoTags" class="tag-container"></div>
-                            <input type="hidden" name="tipo" id="tipoHidden" value="{{ request.args.get('tipo', '') }}">
-                        </div>
+                                </datalist>
+                                <div id="tipoTags" class="tag-container"></div>
+                                <input type="hidden" name="tipo" id="tipoHidden" value="{{ request.args.get('tipo', '') }}">
+                            </div>
 
-                        <div class="filter-field">
-                            <label>Abilities</label>
-                            <input list="lista-habs" id="habInput" placeholder="Select ability...">
-                            <datalist id="lista-habs">
-                                {% for h in todas_las_habilidades %}
-                                <option value="{{ h }}">
+                            <div class="filter-field">
+                                <label>Abilities</label>
+                                <input list="lista-habs" id="habInput" placeholder="Select ability...">
+                                <datalist id="lista-habs">
+                                    {% for h in todas_las_habilidades %}
+                                    <option value="{{ h }}">
                                     {% endfor %}
-                            </datalist>
-                            <div id="habTags" class="tag-container"></div>
-                            <input type="hidden" name="habilidad" id="habHidden"
-                                value="{{ request.args.get('habilidad', '') }}">
-                        </div>
+                                </datalist>
+                                <div id="habTags" class="tag-container"></div>
+                                <input type="hidden" name="habilidad" id="habHidden"
+                                    value="{{ request.args.get('habilidad', '') }}">
+                            </div>
 
-                        <button type="submit" class="btn-apply">Apply Filters</button>
-                    </form>
+                            <button type="submit" class="btn-apply">Apply Filters</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
 
+        {# TABLA DE RESULTADOS #}
         <table class="lista-table">
             <thead>
                 <tr>
                     <th class="id-col">
-                        <a
-                            href="/lpokemon?order_by=id&direction={{ 'DESC' if order_by == 'id' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
+                        <a href="/lpokemon?order_by=id&direction={{ 'DESC' if order_by == 'id' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
                             Nº
                             <span class="sort-arrow">
                                 {% if order_by == 'id' %}{{ '▲' if direction == 'ASC' else '▼' }}{% endif %}
@@ -86,8 +113,7 @@
                     </th>
                     <th class="img-col">FOTO</th>
                     <th class="name-col">
-                        <a
-                            href="/lpokemon?order_by=nombre&direction={{ 'DESC' if order_by == 'nombre' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
+                        <a href="/lpokemon?order_by=nombre&direction={{ 'DESC' if order_by == 'nombre' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
                             NOMBRE
                             <span class="sort-arrow">
                                 {% if order_by == 'nombre' %}{{ '▲' if direction == 'ASC' else '▼' }}{% endif %}
@@ -95,8 +121,7 @@
                         </a>
                     </th>
                     <th class="type-col">
-                        <a
-                            href="/lpokemon?order_by=tipos&direction={{ 'DESC' if order_by == 'tipos' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
+                        <a href="/lpokemon?order_by=tipos&direction={{ 'DESC' if order_by == 'tipos' and direction == 'ASC' else 'ASC' }}{{ filtros_solo }}">
                             TIPOS
                             <span class="sort-arrow">
                                 {% if order_by == 'tipos' %}{{ '▲' if direction == 'ASC' else '▼' }}{% endif %}
@@ -121,6 +146,7 @@
             </tbody>
         </table>
 
+        {# PAGINACIÓN #}
         <div class="pagination">
             {% if pagina > 1 %}
             <a href="/lpokemon?page={{ pagina - 1 }}{{ params }}" class="btn-page">Anterior</a>
@@ -132,9 +158,9 @@
             </a>
             {% endfor %}
 
-            {% if pagina < total_p %} <a href="/lpokemon?page={{ pagina + 1 }}{{ params }}" class="btn-page">
-                Siguiente</a>
-                {% endif %}
+            {% if pagina < total_p %}
+            <a href="/lpokemon?page={{ pagina + 1 }}{{ params }}" class="btn-page">Siguiente</a>
+            {% endif %}
         </div>
     </div>
 

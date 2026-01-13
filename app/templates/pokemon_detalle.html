@@ -7,9 +7,34 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="main-wrapper">
-        <div class="nav-top">
-            <a href="/" class="btn-pokedex-logo">Pokédex</a>
+    <div class="menu-main-container">
+
+        {# --- BANNER ESTILO MENÚ PRINCIPAL --- #}
+        <div class="menu-banner">Pokédex</div>
+
+        {# --- ENLACES DE USUARIO ALINEADOS A LA DERECHA --- #}
+        <div class="menu-top-links" style="display: flex; align-items: center; gap: 15px; justify-content: flex-end; margin-bottom: 30px;">
+
+            {% if session['role'] == 'ADMIN' %}
+                <a href="{{ url_for('iu_admin.panel') }}" class="menu-link-secondary" style="font-weight: bold; color: #c0392b;">
+                    ⚙️ Panel Admin
+                </a>
+                <span style="color: #ccc;">|</span>
+            {% endif %}
+
+            <a href="{{ url_for('iu_mprincipal.profile') }}" class="menu-link-secondary">Ver Perfil</a>
+            <span style="color: #ccc;">|</span>
+
+            <span style="color: #444; font-size: 0.9em;">
+                Usuario: <strong>{{ session['user'] }}</strong>
+                {% if session['role'] == 'ADMIN' %}(ADMIN){% endif %}
+            </span>
+
+            <span style="color: #ccc;">|</span>
+
+            <a href="{{ url_for('iu_mprincipal.logout') }}" class="menu-link-secondary" style="color: #e74c3c;">
+                Cerrar Sesión
+            </a>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -21,17 +46,19 @@
             </div>
           {% endif %}
         {% endwith %}
-        <div class="header">
-            <div class="titulo">
+
+        {# --- CABECERA DEL POKÉMON CON BOTÓN VOLVER --- #}
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div class="titulo" style="border: none; margin: 0;">
                 {{ p.name }} <span class="detail-number">#{{ "%03d" | format(p.id) }}</span>
             </div>
-            <a href="{{ return_url }}" class="btn-filter-trigger" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
-                    Volver
+            <a href="{{ return_url }}" class="btn-filter-trigger" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; width: 100px; height: 35px;">
+                Volver
             </a>
         </div>
 
+        {# --- FICHA DE DETALLE --- #}
         <div class="detail-card-modern">
-
             <div class="detail-visual">
                 <div class="image-container-inner">
                     <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{{ p.id }}.png"
@@ -51,7 +78,7 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                </div>
+            </div>
 
             <div class="detail-data">
                 {% if p.description %}
@@ -95,7 +122,6 @@
                 <div class="data-section evolution-footer">
                     <h3>Línea Evolutiva</h3>
                     <div class="evo-tree-wrapper">
-                        {# ETAPA 1 #}
                         <div class="evo-column">
                             {% for evo in p.evolution.e1 %}
                                 <div class="evo-box-modern {{ 'active' if evo.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ evo.id }}'">
@@ -108,14 +134,11 @@
                             {% endfor %}
                         </div>
 
-                        {# FLECHA Y RAMAS #}
                         {% if p.evolution.e2 %}
                             <div class="evo-arrow">➜</div>
-
                             <div class="evo-branches-container">
                                 {% for e2_pk in p.evolution.e2 %}
                                     <div class="evo-branch-path">
-                                        {# Caja Etapa 2 #}
                                         <div class="evo-box-modern {{ 'active' if e2_pk.id == p.id else '' }}" onclick="window.location.href='/pokemon/{{ e2_pk.id }}'">
                                             <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ e2_pk.id }}.png" alt="{{ e2_pk.name }}">
                                             <span>{{ e2_pk.name }}</span>
@@ -124,9 +147,7 @@
                                             </div>
                                         </div>
 
-                                        {# ETAPA 3 #}
                                         {% set hijos_e3 = p.evolution.e3 | selectattr("id_padre", "equalto", e2_pk.id) | list %}
-
                                         {% if hijos_e3 %}
                                             <div class="evo-arrow">➜</div>
                                             <div class="evo-column">
