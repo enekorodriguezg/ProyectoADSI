@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
-from app.database.GestorBD import GestorBD
 
 
 def iu_admin_blueprint(db):
@@ -18,8 +17,7 @@ def iu_admin_blueprint(db):
         if 'user' not in session or session.get('role') != 'ADMIN':
             return redirect(url_for('iu_mprincipal.login'))
 
-        gestor = GestorBD()
-        res = gestor.execSQL("SELECT * FROM Users WHERE role = 'PENDANT'")
+        res = db.execSQL("SELECT * FROM Users WHERE role = 'PENDANT'")
         lista = []
         while res.next():
             lista.append({
@@ -35,18 +33,14 @@ def iu_admin_blueprint(db):
     @bp.route('/approve/<username>')
     def approve_user(username):
         # ... (Tu código de aprobar) ...
-        gestor = GestorBD()
-        gestor.connection.execute(f"UPDATE Users SET role='USER' WHERE username='{username}'")
-        gestor.connection.commit()
+        db.execSQL(f"UPDATE Users SET role='USER' WHERE username='{username}'")
         flash(f'Usuario {username} aprobado.', 'success')
         return redirect(url_for('iu_admin.requests_list'))
 
     @bp.route('/reject/<username>')
     def reject_user(username):
         # ... (Tu código de rechazar) ...
-        gestor = GestorBD()
-        gestor.connection.execute(f"DELETE FROM Users WHERE username='{username}'")
-        gestor.connection.commit()
+        db.execSQL(f"DELETE FROM Users WHERE username='{username}'")
         flash(f'Solicitud de {username} rechazada.', 'info')
         return redirect(url_for('iu_admin.requests_list'))
 
@@ -56,8 +50,6 @@ def iu_admin_blueprint(db):
         if 'user' not in session or session.get('role') != 'ADMIN':
             return redirect(url_for('iu_mprincipal.login'))
 
-        gestor = GestorBD()
-
         # BUSCADOR: Si envían ?q=pepe, filtramos
         query = request.args.get('q')
         if query:
@@ -65,7 +57,7 @@ def iu_admin_blueprint(db):
         else:
             sql = "SELECT * FROM Users WHERE role = 'USER'"
 
-        res = gestor.execSQL(sql)
+        res = db.execSQL(sql)
 
         lista_usuarios = []
         while res.next():
@@ -85,8 +77,6 @@ def iu_admin_blueprint(db):
         if 'user' not in session or session.get('role') != 'ADMIN':
             return redirect(url_for('iu_mprincipal.login'))
 
-        gestor = GestorBD()
-
         if request.method == 'POST':
             nombre = request.form['name']
             apellido = request.form['surname']
@@ -101,15 +91,14 @@ def iu_admin_blueprint(db):
                 else:
                     sql = f"UPDATE Users SET name='{nombre}', surname='{apellido}', dni='{dni}', email='{email}' WHERE username='{username}'"
 
-                gestor.connection.execute(sql)
-                gestor.connection.commit()
+                db.execSQL(sql)
                 flash(f'Datos de {username} actualizados.', 'success')
                 return redirect(url_for('iu_admin.users_list'))
             except Exception as e:
                 flash(f'Error al editar: {e}', 'error')
 
         # Cargar datos actuales
-        res = gestor.execSQL(f"SELECT * FROM Users WHERE username='{username}'")
+        res = db.execSQL(f"SELECT * FROM Users WHERE username='{username}'")
         datos = {}
         if res.next():
             datos = {

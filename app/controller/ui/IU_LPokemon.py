@@ -1,10 +1,22 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from app.controller.model.Catalogo import Catalogo
+from datetime import datetime
 
 
 def iu_lpokemon_blueprint(db):
     bp = Blueprint('lpokemon', __name__)
     catalogo = Catalogo(db)
+
+    def registrar_actividad_pokemon(username, mensaje_text):
+        """Registra una acción de pokémon en la tabla Mensaje"""
+        try:
+            fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # Escapar comillas en el mensaje
+            mensaje_limpio = mensaje_text.replace("'", "''")
+            sql = f"INSERT INTO Mensaje (username, message_text, date_hour) VALUES ('{username}', '{mensaje_limpio}', '{fecha_hora}')"
+            db.execSQL(sql)
+        except Exception as e:
+            print(f"Error registrando actividad: {e}")
 
     @bp.route('/lpokemon')
     def mostrarLista():
@@ -112,12 +124,15 @@ def iu_lpokemon_blueprint(db):
         try:
             # 2. Actualizar BD
             sql = f"UPDATE Users SET fav_pokemon = {id_pokemon} WHERE username = '{usuario}'"
-            db.connection.execute(sql)
-            db.connection.commit()
+            db.execSQL(sql)
 
             # 3. Obtener nombre para el mensaje (estético)
             res = db.execSQL(f"SELECT name FROM PokeEspecie WHERE id_pokedex = {id_pokemon}")
             poke_name = res.getString('name') if res.next() else "Pokémon"
+
+            # 4. Registrar actividad
+            mensaje = f"{usuario} ha establecido a {poke_name} como su Pokémon favorito"
+            registrar_actividad_pokemon(usuario, mensaje)
 
             flash(f'¡{poke_name} es ahora tu Pokémon favorito!', 'success')
         except Exception as e:

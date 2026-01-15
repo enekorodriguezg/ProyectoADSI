@@ -1,12 +1,24 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from app.controller.model.GestorEquipos import GestorEquipos
 from app.controller.model.Catalogo import Catalogo
+from datetime import datetime
 
 
 def iu_equipos_blueprint(db):
     bp = Blueprint('iu_equipos', __name__)
     gestor = GestorEquipos(db)
     catalogo = Catalogo(db)
+
+    def registrar_actividad_equipo(username, mensaje_text):
+        """Registra una acción de equipo en la tabla Mensaje"""
+        try:
+            fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # Escapar comillas en el mensaje
+            mensaje_limpio = mensaje_text.replace("'", "''")
+            sql = f"INSERT INTO Mensaje (username, message_text, date_hour) VALUES ('{username}', '{mensaje_limpio}', '{fecha_hora}')"
+            db.execSQL(sql)
+        except Exception as e:
+            print(f"Error registrando actividad: {e}")
 
     @bp.route('/equipos')
     def listar_equipos():
@@ -29,6 +41,8 @@ def iu_equipos_blueprint(db):
             exito = gestor.createTeam(nombre, session['user'])  # Nota: diagrama orden (name, username)
             if exito:
                 flash("Equipo creado con éxito.", 'success')
+                mensaje = f"{session['user']} ha creado el equipo '{nombre}'"
+                registrar_actividad_equipo(session['user'], mensaje)
             else:
                 flash("Error: Nombre duplicado o fallo técnico.", 'error')
 
@@ -64,6 +78,39 @@ def iu_equipos_blueprint(db):
         equipo = gestor._rellenarDetallesEquipo(id_team)
         session['editando_equipo_id'] = id_team
         return render_template('editar_equipo.html', equipo=equipo)
+
+    @bp.route('/equipos/guardar/<int:id_team>', methods=['POST'])
+    def guardar_equipo(id_team):
+        """Guarda los cambios finales del equipo y registra el mensaje de actividad"""
+        if 'user' not in session:
+            return redirect(url_for('iu_mprincipal.login'))
+
+        # Obtener detalles del equipo
+        equipo = gestor._rellenarDetallesEquipo(id_team)
+        if not equipo:
+            return redirect(url_for('iu_equipos.listar_equipos'))
+
+        # Obtener lista de pokémon en el equipo
+        pokemones = []
+        if equipo.pokemonList:
+            for pk in equipo.pokemonList:
+                pokemones.append(pk['nombre'])
+
+        # Crear mensaje descriptivo
+        if pokemones:
+            lista_pokes = ', '.join(pokemones)
+            mensaje = f"{session['user']} ha modificado el equipo '{equipo.name}' y ahora lo forman: {lista_pokes}"
+        else:
+            mensaje = f"{session['user']} ha modificado el equipo '{equipo.name}' (vacío)"
+
+        registrar_actividad_equipo(session['user'], mensaje)
+        
+        # Limpiar sesión
+        if 'editando_equipo_id' in session:
+            del session['editando_equipo_id']
+
+        flash("Equipo guardado.", 'success')
+        return redirect(url_for('iu_equipos.listar_equipos'))
 
     @bp.route('/equipos/quitar_pk/<int:id_instancia>')
     def quitar_pokemon(id_instancia):
