@@ -168,8 +168,12 @@ def iu_equipos_blueprint(db):
         id_team = request.args.get('id_team')
         stat_name = request.args.get('stat')
 
-        if not id_team or not stat_name:
-            flash("Faltan parámetros", "error")
+        if not id_team:
+            flash("Debe seleccionar un equipo para evaluar", "error")
+            return redirect(url_for('iu_equipos.listar_equipos'))
+            
+        if not stat_name:
+            flash("Debe seleccionar una estadística para evaluar", "error")
             return redirect(url_for('iu_equipos.listar_equipos'))
 
         # Usamos métodos internos de Gestor para no duplicar lógica
@@ -177,7 +181,7 @@ def iu_equipos_blueprint(db):
         equipo = gestor._rellenarDetallesEquipo(id_team)
 
         if not equipo or not equipo.pokemonList:
-            flash("El equipo no existe o está vacío.", "error")
+            flash("El equipo seleccionado está vacío", "error")
             return redirect(url_for('iu_equipos.listar_equipos'))
 
         # Lógica para encontrar el mejor
