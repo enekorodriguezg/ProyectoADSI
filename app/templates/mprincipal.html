@@ -17,11 +17,13 @@
             {% if session['role'] == 'ADMIN' %}
                 <a href="{{ url_for('iu_admin.panel') }}" class="menu-link-secondary" style="font-weight: bold; color: #c0392b;">
                     ⚙️ Panel Admin
-                </>
+                </a>
                 <span style="color: #ccc;">|</span>
             {% endif %}
+
             <a href="{{ url_for('iu_mprincipal.profile') }}" class="menu-link-secondary">Ver Perfil</a>
-            <a href="#" class="menu-link-secondary">ChangeLog</a>
+
+            <a href="{{ url_for('iu_actividad.index') }}" class="menu-link-secondary">ChangeLog</a>
 
             <span style="color: #ccc;">|</span>
 
@@ -60,14 +62,7 @@
                 <p>Gestiona tu lista de contactos y entrenadores.</p>
             </a>
 
-            <a href="{{ url_for('iu_actividad.index') }}" class="menu-nav-card">
-                <div class="dot"></div>
-                <h2>Actividad</h2>
-                <p>Sigue la actividad de tus amigos en tiempo real.</p>
-            </a>
-        </div>
+            </div>
     </div>
-
 </body>
-
 </html>
