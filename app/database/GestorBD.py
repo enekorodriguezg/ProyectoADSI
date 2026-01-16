@@ -151,5 +151,9 @@ class GestorBD:
         """Ejecuta una consulta SQL y devuelve los datos envueltos en ResultadoSQL"""
         cursor = self.connection.cursor()
         cursor.execute(sql)
+
+        if not sql.strip().upper().startswith("SELECT"):
+            self.connection.commit()
+
         datos = cursor.fetchall()
         return ResultadoSQL(datos)
