@@ -1,4 +1,4 @@
--- 1. Tablas Maestras
+-- 1. TABLAS MAESTRAS
 CREATE TABLE IF NOT EXISTS Tipo (
     name VARCHAR(50) PRIMARY KEY
 );
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS Habilidad (
     description TEXT
 );
 
--- 2. Especies y Evoluciones
+-- 2. ESPECIES Y EVOLUCIONES
 CREATE TABLE IF NOT EXISTS PokeEspecie (
     id_pokedex INT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -31,22 +31,23 @@ CREATE TABLE IF NOT EXISTS Evoluciona (
     FOREIGN KEY (id_evolution) REFERENCES PokeEspecie(id_pokedex)
 );
 
--- 3. Usuarios (CORREGIDO)
+-- 3. USUARIOS Y COMUNICACIÓN
 CREATE TABLE IF NOT EXISTS Users (
     username VARCHAR(50) PRIMARY KEY,
-    password VARCHAR(100), -- ¡Importante la coma al final!
+    password VARCHAR(100),
     fav_pokemon INT,
     name VARCHAR(100),
     surname VARCHAR(100),
     dni VARCHAR(20) UNIQUE,
     email VARCHAR(100) UNIQUE,
-    role VARCHAR(20)
+    role VARCHAR(20),
+    FOREIGN KEY (fav_pokemon) REFERENCES PokeEspecie(id_pokedex)
 );
 
 CREATE TABLE IF NOT EXISTS Amigo (
-    user_sender VARCHAR(50),    -- El que envía la solicitud
-    user_receiver VARCHAR(50),  -- El que la recibe
-    status INTEGER DEFAULT 0,   -- 0: Pendiente, 1: Aceptada
+    user_sender VARCHAR(50),
+    user_receiver VARCHAR(50),
+    status INTEGER DEFAULT 0, -- 0: Pendiente, 1: Aceptada
     request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_sender, user_receiver),
     FOREIGN KEY (user_sender) REFERENCES Users(username),
@@ -61,26 +62,7 @@ CREATE TABLE IF NOT EXISTS Mensaje (
     FOREIGN KEY (username) REFERENCES Users(username)
 );
 
--- 4. Instancias de Pokémon
-CREATE TABLE IF NOT EXISTS Pokémon (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    owner VARCHAR(50),
-    id_pokedex INT,
-    ability_name VARCHAR(50),
-    species_name VARCHAR(100),
-    weight DECIMAL(10,2),
-    ps INT,
-    attack INT,
-    defense INT,
-    special_attack INT,
-    special_defense INT,
-    speed INT,
-    FOREIGN KEY (owner) REFERENCES Users(username),
-    FOREIGN KEY (id_pokedex) REFERENCES PokeEspecie(id_pokedex),
-    FOREIGN KEY (ability_name) REFERENCES Habilidad(name)
-);
-
--- 5. Relaciones complejas y equipos
+-- 4. EQUIPOS (Referenciando directamente a PokeEspecie)
 CREATE TABLE IF NOT EXISTS EquipoPokémon (
     id_team INTEGER PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(50),
@@ -90,12 +72,13 @@ CREATE TABLE IF NOT EXISTS EquipoPokémon (
 
 CREATE TABLE IF NOT EXISTS PokémonParticipa (
     id_team INT,
-    id_pokemon INT,
-    PRIMARY KEY (id_team, id_pokemon),
+    id_pokedex INT,
+    PRIMARY KEY (id_team, id_pokedex),
     FOREIGN KEY (id_team) REFERENCES EquipoPokémon(id_team),
-    FOREIGN KEY (id_pokemon) REFERENCES Pokémon(id)
+    FOREIGN KEY (id_pokedex) REFERENCES PokeEspecie(id_pokedex)
 );
 
+-- 5. RELACIONES DE ATRIBUTOS
 CREATE TABLE IF NOT EXISTS HabilidadesPosibles (
     id_pokemon INT,
     ability_name VARCHAR(50),
