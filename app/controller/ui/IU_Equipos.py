@@ -1,24 +1,14 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from app.controller.model.GestorEquipos import GestorEquipos
+from app.controller.model.GestorActividad import GestorActividad
 from app.controller.model.Catalogo import Catalogo
-from datetime import datetime
 
 
 def iu_equipos_blueprint(db):
     bp = Blueprint('iu_equipos', __name__)
     gestor = GestorEquipos(db)
+    gestor_actividad = GestorActividad(db)
     catalogo = Catalogo(db)
-
-    def registrar_actividad_equipo(username, mensaje_text):
-        """Registra una acción de equipo en la tabla Mensaje"""
-        try:
-            fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            # Escapar comillas en el mensaje
-            mensaje_limpio = mensaje_text.replace("'", "''")
-            sql = f"INSERT INTO Mensaje (username, message_text, date_hour) VALUES ('{username}', '{mensaje_limpio}', '{fecha_hora}')"
-            db.execSQL(sql)
-        except Exception as e:
-            print(f"Error registrando actividad: {e}")
 
     @bp.route('/equipos')
     def listar_equipos():
@@ -42,7 +32,7 @@ def iu_equipos_blueprint(db):
             if exito:
                 flash("Equipo creado con éxito.", 'success')
                 mensaje = f"{session['user']} ha creado el equipo '{nombre}'"
-                registrar_actividad_equipo(session['user'], mensaje)
+                gestor_actividad.registrar_actividad(session['user'], mensaje)
             else:
                 flash("Error: Nombre duplicado o fallo técnico.", 'error')
 
@@ -103,7 +93,7 @@ def iu_equipos_blueprint(db):
         else:
             mensaje = f"{session['user']} ha modificado el equipo '{equipo.name}' (vacío)"
 
-        registrar_actividad_equipo(session['user'], mensaje)
+        gestor_actividad.registrar_actividad(session['user'], mensaje)
         
         # Limpiar sesión
         if 'editando_equipo_id' in session:
