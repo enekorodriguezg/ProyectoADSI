@@ -5,6 +5,7 @@ def iu_chatbot_blueprint(db):
 
     @bp.route('/chatbot')
     def index():
+        if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
         return render_template('chatbot.html')
 
     @bp.route('/chatbot/ver_compatibilidad')
