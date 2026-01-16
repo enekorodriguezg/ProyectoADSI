@@ -44,7 +44,10 @@
         </div>
 
         <div style="text-align:center; margin-top:40px;">
-            <a href="{{ url_for('iu_equipos.listar_equipos') }}" class="btn-secondary" style="padding:10px 20px; border-radius:10px; text-decoration:none;">Guardar y Salir</a>
+            <form method="POST" action="{{ url_for('iu_equipos.guardar_equipo', id_team=equipo.id) }}" style="display:inline;">
+                <button type="submit" class="btn-primary" style="padding:10px 20px; border-radius:10px; border:none; cursor:pointer; font-weight:bold;">Guardar Equipo</button>
+            </form>
+            <a href="{{ url_for('iu_equipos.listar_equipos') }}" class="btn-secondary" style="padding:10px 20px; border-radius:10px; text-decoration:none; margin-left:10px;">Cancelar</a>
         </div>
     </div>
 </body>

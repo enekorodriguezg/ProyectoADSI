@@ -34,8 +34,7 @@ class GestorEquipos:
         # 2. Insertar
         sql = f"INSERT INTO EquipoPokémon (username, name) VALUES ('{username}', '{name}')"
         try:
-            self.db.connection.execute(sql)
-            self.db.connection.commit()
+            self.db.execSQL(sql)
             return True
         except Exception as e:
             print(f"Error createTeam: {e}")
@@ -45,10 +44,9 @@ class GestorEquipos:
     def deleteTeam(self, idTeam):
         try:
             # Primero borramos los pokémon que participan en ese equipo (Integridad referencial)
-            self.db.connection.execute(f"DELETE FROM PokémonParticipa WHERE id_team = {idTeam}")
+            self.db.execSQL(f"DELETE FROM PokémonParticipa WHERE id_team = {idTeam}")
             # Luego borramos el equipo
-            self.db.connection.execute(f"DELETE FROM EquipoPokémon WHERE id_team = {idTeam}")
-            self.db.connection.commit()
+            self.db.execSQL(f"DELETE FROM EquipoPokémon WHERE id_team = {idTeam}")
             return True
         except Exception as e:
             print(f"Error deleteTeam: {e}")
@@ -69,22 +67,28 @@ class GestorEquipos:
             if not res_esp.next():
                 return False
 
-            cursor = self.db.connection.cursor()
-            cursor.execute("""
-                           INSERT INTO Pokémon (owner, id_pokedex, species_name, ps, attack, defense, special_attack,
+            # Construir SQL para insertar
+            poke_name = res_esp.getString("name")
+            ps = res_esp.getInt("ps")
+            attack = res_esp.getInt("attack")
+            defense = res_esp.getInt("defense")
+            special_attack = res_esp.getInt("special_attack")
+            special_defense = res_esp.getInt("special_defense")
+            speed = res_esp.getInt("speed")
+            
+            sql_insert = f"""INSERT INTO Pokémon (owner, id_pokedex, species_name, ps, attack, defense, special_attack,
                                                 special_defense, speed)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                           """, (usuario, idPokemon, res_esp.getString("name"),
-                                 res_esp.getInt("ps"), res_esp.getInt("attack"), res_esp.getInt("defense"),
-                                 res_esp.getInt("special_attack"), res_esp.getInt("special_defense"),
-                                 res_esp.getInt("speed")))
-
-            id_nueva_instancia = cursor.lastrowid
+                           VALUES ('{usuario}', {idPokemon}, '{poke_name}', {ps}, {attack}, {defense}, {special_attack}, {special_defense}, {speed})"""
+            self.db.execSQL(sql_insert)
+            
+            # Obtener el ID de la nueva instancia
+            res_id = self.db.execSQL(f"SELECT last_insert_rowid() as id")
+            res_id.next()
+            id_nueva_instancia = res_id.getInt("id")
 
             # 3. Vincular en 'PokémonParticipa'
-            cursor.execute("INSERT INTO PokémonParticipa (id_team, id_pokemon) VALUES (?, ?)",
-                           (idEquipo, id_nueva_instancia))
-            self.db.connection.commit()
+            sql_participa = f"INSERT INTO PokémonParticipa (id_team, id_pokemon) VALUES ({idEquipo}, {id_nueva_instancia})"
+            self.db.execSQL(sql_participa)
             return True
 
         except Exception as e:
@@ -96,11 +100,10 @@ class GestorEquipos:
     def deletePokemonFromTeam(self, idEquipo, idPokemon):
         try:
             # Eliminar vínculo
-            self.db.connection.execute(
+            self.db.execSQL(
                 f"DELETE FROM PokémonParticipa WHERE id_team = {idEquipo} AND id_pokemon = {idPokemon}")
             # Eliminar instancia (opcional, limpieza de BD)
-            self.db.connection.execute(f"DELETE FROM Pokémon WHERE id = {idPokemon}")
-            self.db.connection.commit()
+            self.db.execSQL(f"DELETE FROM Pokémon WHERE id = {idPokemon}")
             return True
         except Exception as e:
             print(f"Error deletePokemonFromTeam: {e}")

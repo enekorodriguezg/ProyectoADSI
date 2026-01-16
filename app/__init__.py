@@ -11,6 +11,7 @@ from app.controller.ui.IU_CadenaEvolutiva import iu_cadena_evolutiva_blueprint
 from app.controller.ui.IU_Equipos import iu_equipos_blueprint
 from app.controller.ui.IU_Admin import iu_admin_blueprint
 from app.controller.ui.IU_Amigos import iu_amigos_blueprint
+from app.controller.ui.IU_Actividad import iu_actividad_blueprint
 from app.database.GestorBD import GestorBD
 from config import Config
 
@@ -52,6 +53,7 @@ def create_app():
     app.register_blueprint(iu_equipos_blueprint(db))
     app.register_blueprint(iu_admin_blueprint(db))
     app.register_blueprint(iu_amigos_blueprint(db))
+    app.register_blueprint(iu_actividad_blueprint(db))
 
 
     return app

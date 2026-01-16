@@ -71,8 +71,7 @@ def iu_mprincipal_blueprint(db):
             try:
                 # Insertamos con rol PENDANT
                 sql = f"INSERT INTO Users (username, password, name, surname, dni, email, role) VALUES ('{username}', '{hashed_pw}', '{name}', '{surname}', '{dni}', '{email}', 'PENDANT')"
-                db.connection.execute(sql)
-                db.connection.commit()
+                db.execSQL(sql)
                 flash('Registro exitoso. Espera a que un administrador apruebe tu cuenta.', 'success')
                 return redirect(url_for('iu_mprincipal.login'))
             except Exception as e:
@@ -128,8 +127,7 @@ def iu_mprincipal_blueprint(db):
             return render_template('profile_view.html', user=datos_usuario)
         else:
             return "Error cargando perfil", 404
-
-    # --- NUEVA LÓGICA: EDITAR PERFIL ---
+     # --- NUEVA LÓGICA: EDITAR PERFIL ---
     @bp.route('/profile/edit', methods=['GET', 'POST'])
     def edit_profile():
         if 'user' not in session:
@@ -152,8 +150,7 @@ def iu_mprincipal_blueprint(db):
                 else:  # Si la deja en blanco, no la tocamos
                     sql = f"UPDATE Users SET name='{nombre}', surname='{apellido}', email='{email}', dni='{dni}' WHERE username='{username}'"
 
-                db.connection.execute(sql)
-                db.connection.commit()
+                db.execSQL(sql)
                 flash('Perfil actualizado correctamente.', 'success')
                 return redirect(url_for('iu_mprincipal.profile'))  # Volvemos a la vista de perfil
             except Exception as e:

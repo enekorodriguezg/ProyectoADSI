@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
-from app.database.GestorBD import GestorBD
 
 
 def iu_amigos_blueprint(db):
@@ -11,7 +10,6 @@ def iu_amigos_blueprint(db):
             return redirect(url_for('iu_mprincipal.login'))
 
         me = session['user']
-        gestor = GestorBD()
 
         # --- 1. CARGAR MIS AMIGOS (Con Pokémon Favorito) ---
         # Seleccionamos Nombre y Pokémon Favorito de todos los usuarios que estén en mi lista de amigos
@@ -25,7 +23,7 @@ def iu_amigos_blueprint(db):
                 SELECT user_sender FROM Amigo WHERE user_receiver='{me}' AND status=1
             )
         """
-        res_amigos = gestor.execSQL(sql_amigos)
+        res_amigos = db.execSQL(sql_amigos)
         mis_amigos = []
         while res_amigos.next():
             mis_amigos.append({
@@ -35,7 +33,7 @@ def iu_amigos_blueprint(db):
 
         # --- 2. CARGAR SOLICITUDES PENDIENTES ---
         sql_solicitudes = f"SELECT user_sender FROM Amigo WHERE user_receiver='{me}' AND status=0"
-        res_soli = gestor.execSQL(sql_solicitudes)
+        res_soli = db.execSQL(sql_solicitudes)
         mis_solicitudes = []
         while res_soli.next():
             mis_solicitudes.append({'username': res_soli.getString('user_sender')})
@@ -51,7 +49,7 @@ def iu_amigos_blueprint(db):
                 AND username != '{me}' 
                 AND role != 'ADMIN'
             """
-            res_search = gestor.execSQL(sql_search)
+            res_search = db.execSQL(sql_search)
 
             while res_search.next():
                 candidato = res_search.getString('username')
@@ -62,7 +60,7 @@ def iu_amigos_blueprint(db):
                     WHERE (user_sender='{me}' AND user_receiver='{candidato}')
                        OR (user_sender='{candidato}' AND user_receiver='{me}')
                 """
-                res_check = gestor.execSQL(sql_check)
+                res_check = db.execSQL(sql_check)
 
                 estado = "NADA"
                 if res_check.next():
@@ -87,20 +85,19 @@ def iu_amigos_blueprint(db):
 
         # Seguridad: Verificar si realmente son amigos antes de cotillear
         me = session['user']
-        gestor = GestorBD()
 
         check_sql = f"""
             SELECT status FROM Amigo 
             WHERE (user_sender='{me}' AND user_receiver='{username}' AND status=1)
                OR (user_sender='{username}' AND user_receiver='{me}' AND status=1)
         """
-        if not gestor.execSQL(check_sql).next():
+        if not db.execSQL(check_sql).next():
             flash('Solo puedes ver los equipos de tus amigos.', 'error')
             return redirect(url_for('iu_amigos.index'))
 
         # Obtener los equipos del amigo
         sql_equipos = f"SELECT id_team, name FROM EquipoPokémon WHERE username='{username}'"
-        res = gestor.execSQL(sql_equipos)
+        res = db.execSQL(sql_equipos)
 
         equipos = []
         while res.next():
@@ -116,13 +113,12 @@ def iu_amigos_blueprint(db):
     def send_request(target):
         if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
         me = session['user']
-        gestor = GestorBD()
         try:
-            gestor.connection.execute(
+            db.execSQL(
                 f"INSERT INTO Amigo (user_sender, user_receiver, status) VALUES ('{me}', '{target}', 0)")
-            gestor.connection.commit()
             flash(f'Solicitud enviada a {target}', 'success')
-        except:
+        except Exception as e:
+            print(f"Error sending request: {e}")
             flash('Error al enviar solicitud.', 'error')
         return redirect(url_for('iu_amigos.index', q=request.args.get('last_query')))
 
@@ -130,9 +126,7 @@ def iu_amigos_blueprint(db):
     def accept_request(sender):
         if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
         me = session['user']
-        gestor = GestorBD()
-        gestor.connection.execute(f"UPDATE Amigo SET status=1 WHERE user_sender='{sender}' AND user_receiver='{me}'")
-        gestor.connection.commit()
+        db.execSQL(f"UPDATE Amigo SET status=1 WHERE user_sender='{sender}' AND user_receiver='{me}'")
         flash(f'¡Ahora eres amigo de {sender}!', 'success')
         return redirect(url_for('iu_amigos.index'))
 
@@ -140,9 +134,7 @@ def iu_amigos_blueprint(db):
     def reject_request(sender):
         if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
         me = session['user']
-        gestor = GestorBD()
-        gestor.connection.execute(f"DELETE FROM Amigo WHERE user_sender='{sender}' AND user_receiver='{me}'")
-        gestor.connection.commit()
+        db.execSQL(f"DELETE FROM Amigo WHERE user_sender='{sender}' AND user_receiver='{me}'")
         flash(f'Solicitud de {sender} rechazada.', 'info')
         return redirect(url_for('iu_amigos.index'))
 
@@ -150,13 +142,11 @@ def iu_amigos_blueprint(db):
     def delete_friend(friend):
         if 'user' not in session: return redirect(url_for('iu_mprincipal.login'))
         me = session['user']
-        gestor = GestorBD()
-        gestor.connection.execute(f"""
+        db.execSQL(f"""
             DELETE FROM Amigo 
             WHERE (user_sender='{me}' AND user_receiver='{friend}') 
                OR (user_sender='{friend}' AND user_receiver='{me}')
         """)
-        gestor.connection.commit()
         flash(f'{friend} eliminado de tus amigos.', 'info')
         return redirect(url_for('iu_amigos.index'))
 
